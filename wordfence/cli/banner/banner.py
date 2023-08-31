@@ -2,6 +2,9 @@ import os
 import sys
 
 TEXT_BANNER = r"""
+   █▀▀ █░░ █▄█ █░█░█ █░█ █▀▀ █▀▀ █░░
+   █▀░ █▄▄ ░█░ ▀▄▀▄▀ █▀█ ██▄ ██▄ █▄▄
+      M A L W A R E   S C A N N E R 
 """
 
 LOGO = r"""
@@ -10,10 +13,10 @@ LOGO = r"""
     ▗▝ ▖▝▞    ▖▘▘▖▝▖ ▘   
     ▌ ▌   ▘▖ ▗▖   ▚▝▚    
    ▚ ▞▗ ▖▖▖▖▚ ▖ ▖▘▘▖▗▘   
-  ▗▘▗▖ ▘ ▖▞▝ ▚ ▞   ▖ ▌   █▀▀ █░░ █▄█ █░█░█ █░█ █▀▀ █▀▀ █░░
-   ▌ ▖  ▞ ▖▚▗▗▘▗▗▗ ▞ ▌   █▀░ █▄▄ ░█░ ▀▄▀▄▀ █▀█ ██▄ ██▄ █▄▄
+  ▗▘▗▖ ▘ ▖▞▝ ▚ ▞   ▖ ▌
+   ▌ ▖  ▞ ▖▚▗▗▘▗▗▗ ▞ ▌
    ▚▖▘▘▘  ▚ ▚ ▘▘  ▚ ▐    
-    ▄ ▚   ▚  ▝▗  ▖ ▖▌      M A L W A R E   S C A N N E R
+    ▄ ▚   ▚  ▝▗  ▖ ▖▌
    ▖ ▚▗▝▘▖▘   ▝▖▘▗▐▝     
     ▘▖▘▝▖▖▞▝▝▝▗▗▐▝       
          ▝ ▘▘▘▘
@@ -75,9 +78,18 @@ def add_logo(banner) -> str:
 
 def get_welcome_banner():
     terminal_columns = os.get_terminal_size().columns
+    text = Banner(TEXT_BANNER)
     logo = Banner(LOGO)
-    if logo.column_count <= terminal_columns:
-        return logo
+    combined = Banner(LOGO)
+    combined.merge(text)
+    variants = [
+            combined,
+            text,
+            logo
+        ]
+    for banner in variants:
+        if banner.column_count <= terminal_columns:
+            return banner
     return None
 
 
