@@ -6,7 +6,7 @@ from ..util.pcre import PcrePattern, PcreException, PcreJitStack, \
         PcreOptions, PCRE_DEFAULT_OPTIONS
 
 
-DEFAULT_TIMEOUT = 1  # Seconds
+DEFAULT_TIMEOUT = 180  # Seconds
 
 
 class TimeoutException(Exception):

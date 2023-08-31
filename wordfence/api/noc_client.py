@@ -5,7 +5,7 @@ from .licensing import License
 from .exceptions import ApiException
 from ..util.validation import Validator, ValidationException
 
-DEFAULT_TIMEOUT = 30
+DEFAULT_TIMEOUT = 180
 
 
 class NocClient:
