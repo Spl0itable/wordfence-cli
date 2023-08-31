@@ -8,10 +8,10 @@ TEXT_BANNER = r"""
    █▀▀ █░░ █▄█ █░█░█ █░█ █▀▀ █▀▀ █░░
    █▀░ █▄▄ ░█░ ▀▄▀▄▀ █▀█ ██▄ ██▄ █▄▄
 
-      M A L W A R E   S C A N N E R 
+     M A L W A R E   S C A N N E R 
 
 
-      
+
 """
 
 LOGO = r"""
