@@ -77,14 +77,7 @@ def add_logo(banner) -> str:
 def get_welcome_banner():
     terminal_columns = os.get_terminal_size().columns
     text = Banner(TEXT_BANNER)
-    logo = Banner(LOGO)
-    combined = Banner(LOGO)
-    combined.merge(text)
-    variants = [
-            combined,
-            text,
-            logo
-        ]
+    variants = [text]
     for banner in variants:
         if banner.column_count <= terminal_columns:
             return banner
