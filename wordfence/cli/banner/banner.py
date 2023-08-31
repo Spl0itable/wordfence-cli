@@ -75,13 +75,8 @@ def add_logo(banner) -> str:
 
 
 def get_welcome_banner():
-    terminal_columns = os.get_terminal_size().columns
     text = Banner(TEXT_BANNER)
-    variants = [text]
-    for banner in variants:
-        if banner.column_count <= terminal_columns:
-            return banner
-    return None
+    return text
 
 
 def show_welcome_banner():
