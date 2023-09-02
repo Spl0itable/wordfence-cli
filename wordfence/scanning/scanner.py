@@ -18,8 +18,8 @@ from ..intel.signatures import SignatureSet
 from ..logging import log, remove_initial_handler
 
 MAX_PENDING_FILES = 10000  # Arbitrary limit
-MAX_PENDING_RESULTS = 10000
-QUEUE_READ_TIMEOUT = 0
+MAX_PENDING_RESULTS = 100
+QUEUE_READ_TIMEOUT = 180
 DEFAULT_CHUNK_SIZE = 1024 * 1024
 FILE_LOCATOR_WORKER_INDEX = 0
 """Used by the file locator process when sending events"""
