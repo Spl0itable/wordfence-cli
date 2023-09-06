@@ -209,9 +209,9 @@ class BannerBox(Box):
             self.window.addstr(index + offset, offset, self.colorize(row))
 
     def colorize(self, string):
-        self.window.addstr(self.color)
+        self.window.attron(self.color)
         self.window.addstr(string)
-        self.window.addstr(curses.color_pair(0))
+        self.window.attroff(self.color)
         return ""
 
 
