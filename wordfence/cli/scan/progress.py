@@ -381,8 +381,16 @@ class ProgressDisplay:
 
     def _setup_colors(self) -> None:
         curses.start_color()
-        curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
-        self.color_brand = curses.color_pair(1)
+
+        if curses.can_change_color() and curses.COLORS >= 256:
+            # Approximation of #03c6dc to the closest xterm-256 color
+            curses.init_color(100, 0, 800, 867)  # Define new color
+            curses.init_pair(1, 100, curses.COLOR_BLACK)  # Pair new color with black
+            self.color_brand = curses.color_pair(1)
+        else:
+            # If we cannot use 256 colors, fall back to CYAN
+            curses.init_pair(1, curses.COLOR_CYAN, curses.COLOR_BLACK)
+            self.color_brand = curses.color_pair(1)
 
     def clear(self):
         self.stdscr.clear()
