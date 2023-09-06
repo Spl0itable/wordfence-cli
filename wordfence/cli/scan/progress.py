@@ -187,12 +187,12 @@ class MetricBox(Box):
 
 class BannerBox(Box):
 
-    def __init__(
-                self,
-                banner,
-                parent: Optional[curses.window] = None
-            ):
+    def colorize(self, string):
+       return f"{self.color}{string}{curses.color_pair(0)}"
+
+    def __init__(self, banner, color=None, parent=None):
         self.banner = banner
+        self.color = color
         super().__init__(parent, border=False)
 
     def get_width(self):
@@ -204,9 +204,12 @@ class BannerBox(Box):
         return self.banner.row_count
 
     def draw_content(self):
-        offset = self.get_border_offset()
-        for index, row in enumerate(self.banner.rows):
-            self.window.addstr(index + offset, offset, row)
+       offset = self.get_border_offset()
+       for index, row in enumerate(self.banner.rows):
+           self.window.addstr(
+               index + offset, offset, 
+               self.colorize(row)
+           )
 
 
 class LogBox(Box):
@@ -397,7 +400,12 @@ class ProgressDisplay:
         banner = get_welcome_banner()
         if banner is None:
             return None
-        return BannerBox(banner=banner, parent=self.stdscr)
+
+        return BannerBox(
+            banner=banner, 
+            color=self.color_brand,
+            parent=self.stdscr
+        )
 
     def _compute_rate(self, value: int, elapsed_time: float) -> int:
         if elapsed_time > 0:
