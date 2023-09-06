@@ -383,9 +383,9 @@ class ProgressDisplay:
         curses.start_color()
 
         if curses.can_change_color() and curses.COLORS >= 256:
-            # Approximation of #03c6dc to the closest xterm-256 color
-            curses.init_color(100, 0, 800, 867)  # Define new color
-            curses.init_pair(1, 100, curses.COLOR_BLACK)  # Pair new color with black
+            # Color 14 or 51 usually corresponds to bright cyan in the xterm-256 palette
+            cyan_color = 14 if curses.COLORS == 16 else 51
+            curses.init_pair(1, cyan_color, curses.COLOR_BLACK)  # Pair new color with black
             self.color_brand = curses.color_pair(1)
         else:
             # If we cannot use 256 colors, fall back to CYAN
