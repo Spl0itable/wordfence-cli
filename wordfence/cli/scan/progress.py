@@ -204,9 +204,11 @@ class BannerBox(Box):
         return self.banner.row_count
 
     def draw_content(self):
-        offset = self.get_border_offset()
-        for index, row in enumerate(self.banner.rows):
-            self.window.addstr(index + offset, offset, row)
+    offset = self.get_border_offset()
+    for index, row in enumerate(self.banner.rows):
+        self.window.attron(self.color_brand)
+        self.window.addstr(index + offset, offset, row)
+        self.window.attroff(self.color_brand)
 
 
 class LogBox(Box):
@@ -374,9 +376,15 @@ class ProgressDisplay:
         self.refresh()
 
     def _setup_colors(self) -> None:
-        curses.start_color()
-        curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
-        self.color_brand = curses.color_pair(1)
+    curses.start_color()
+    if curses.can_change_color():
+        # Approximate RGB(3, 198, 220) to a color in the 0-1000 range that curses uses
+        curses.init_color(10, 3 * 1000 // 255, 198 * 1000 // 255, 220 * 1000 // 255)
+        curses.init_pair(1, 10, curses.COLOR_BLACK)
+    else:
+        # If the terminal doesn't support color changing, use cyan as a fallback
+        curses.init_pair(1, curses.COLOR_CYAN, curses.COLOR_BLACK)
+    self.color_brand = curses.color_pair(1)
 
     def clear(self):
         self.stdscr.clear()
