@@ -19,7 +19,7 @@ from ..logging import log, remove_initial_handler
 
 MAX_PENDING_FILES = 5000  # Arbitrary limit
 MAX_PENDING_RESULTS = 100
-QUEUE_READ_TIMEOUT = 180
+QUEUE_READ_TIMEOUT = 0
 DEFAULT_CHUNK_SIZE = 1024 * 1024
 FILE_LOCATOR_WORKER_INDEX = 0
 """Used by the file locator process when sending events"""
