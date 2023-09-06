@@ -29,8 +29,6 @@ LOGO = r"""
          ▝ ▘▘▘▘
 """
 
-def colorize(string: str, color: str) -> str:
-    return f"\033[{color}m{string}\033[0m"
 
 class Banner:
 
@@ -75,7 +73,7 @@ class Banner:
 
     def display(self) -> None:
         for row in self.rows:
-            print(colorize(row, '96'))  # Add color to the row
+            print(row)
 
     def __str__(self) -> str:
         return self.content
@@ -113,6 +111,6 @@ def should_show_welcome_banner(banner_enabled):
 
 
 def show_welcome_banner_if_enabled(config) -> None:
-    if should_show_welcome_banner(config.banner):
+    if should_show_welcome_banner(config.banner) and \
+            not config.quiet and not config.progress:
         show_welcome_banner()
-        
