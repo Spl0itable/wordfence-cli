@@ -206,10 +206,13 @@ class BannerBox(Box):
     def draw_content(self):
        offset = self.get_border_offset()
        for index, row in enumerate(self.banner.rows):
-           self.window.addstr(
-               index + offset, offset, 
-               self.colorize(row)
-           )
+            self.window.addstr(index + offset, offset, self.colorize(row))
+
+    def colorize(self, string):
+        self.window.addstr(self.color)
+        self.window.addstr(string)
+        self.window.addstr(curses.color_pair(0))
+        return ""
 
 
 class LogBox(Box):
