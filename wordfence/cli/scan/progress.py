@@ -462,7 +462,7 @@ class ProgressDisplay:
         curses.noecho()
         curses.curs_set(0)
         self.terminal_size = os.get_terminal_size()
-        self._setup_colors()  # Call this before _initialize_content
+        self._setup_colors()
         self._initialize_content(self.terminal_size)
 
     def _initialize_content(self, size: os.terminal_size) -> None:
@@ -477,12 +477,10 @@ class ProgressDisplay:
         curses.start_color()
 
         if curses.can_change_color() and curses.COLORS >= 256:
-            # Color 14 or 51 usually corresponds to bright cyan in the xterm-256 palette
             cyan_color = 14 if curses.COLORS == 16 else 51
-            curses.init_pair(1, cyan_color, curses.COLOR_BLACK)  # Pair new color with black
+            curses.init_pair(1, cyan_color, curses.COLOR_BLACK)
             self.color_brand = curses.color_pair(1)
         else:
-            # If we cannot use 256 colors, fall back to CYAN
             curses.init_pair(1, curses.COLOR_CYAN, curses.COLOR_BLACK)
             self.color_brand = curses.color_pair(1)
 
