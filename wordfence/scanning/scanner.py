@@ -151,18 +151,18 @@ class FileLocator:
             for item in contents:
                 if item.is_symlink() and self._is_loop(item.path, parents):
                     continue
-                    
+
                 owner_id = os.stat(item.path).st_uid
                 owner_name = pwd.getpwuid(owner_id).pw_name
-                if owner_name in {"root", "nobody"}:
-                    log.warning(f"Skipping {item.path} owned by root or nobody")
+                if owner_name != pwd.getpwuid(os.getuid()).pw_name:
+                    log.warning(f"Skipping {item.path} not owned by current user")
                     continue
-                
+
                 if item.is_dir():
                     yield from self.search_directory(
-                            item.path,
-                            parents + [item.path]
-                        )
+                        item.path,
+                        parents + [item.path]
+                    )
                 elif item.is_file():
                     if not self.file_filter.filter(item.path):
                         continue
@@ -171,8 +171,8 @@ class FileLocator:
         except OSError as os_error:
             detail = str(os_error)
             raise ScanningIoException(
-                    f'Directory search of {path} failed ({detail})'
-                ) from os_error
+                f'Directory search of {path} failed ({detail})'
+            ) from os_error
 
     def locate(self):
         real_path = os.path.realpath(self.path)
