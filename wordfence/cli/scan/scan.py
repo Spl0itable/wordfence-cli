@@ -164,6 +164,9 @@ class ScanCommand:
         excluded_path = "./wordfence-cli"
         filter.add(self._filter_path(excluded_path), False)
 
+        # Exclude symbolic links
+        filter.add(self._filter_symlinks(), False)
+
         if not has_include_overrides:
             filter.add(filtering.filter_php)
             filter.add(filtering.filter_html)
@@ -188,6 +191,10 @@ class ScanCommand:
     def _filter_path(self, excluded_path):
         def filter_func(file_path):
             return not file_path.startswith(excluded_path)
+
+    def _filter_symlinks(self):
+        def filter_func(file_path):
+            return not os.path.islink(file_path)
 
         return filter_func
 
