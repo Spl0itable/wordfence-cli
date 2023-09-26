@@ -148,29 +148,29 @@ class FileLocator:
                 if item.is_symlink() and self._is_loop(item.path, parents):
                     continue
 
-                owner_id = os.stat(item.path).st_uid
-                owner_name = pwd.getpwuid(owner_id).pw_name
-                if owner_name != pwd.getpwuid(os.getuid()).pw_name:
-                    log.warning(f"Skipping {item.path} not owned by current user")
-                    continue
+                try:
+                    owner_id = os.stat(item.path).st_uid
+                    owner_name = pwd.getpwuid(owner_id).pw_name
+                    if owner_name != pwd.getpwuid(os.getuid()).pw_name:
+                        log.warning(f"Skipping {item.path} not owned by current user")
+                        continue
 
-                if item.is_dir():
-                    try:
+                    if item.is_dir():
                         yield from self.search_directory(
                             item.path,
                             parents + [item.path]
                         )
-                    except PermissionError:
-                        log.warning(f"Skipping {item.path} due to insufficient permissions")
-                elif item.is_file():
-                    if not self.file_filter.filter(item.path):
-                        continue
-                    self.located_count += 1
-                    yield item.path
+                    elif item.is_file():
+                        if not self.file_filter.filter(item.path):
+                            continue
+                        self.located_count += 1
+                        yield item.path
+                except (PermissionError, FileNotFoundError) as error:
+                    log.warning(f"Skipping {item.path}: {error}")
         except OSError as os_error:
             detail = str(os_error)
             raise ScanningIoException(
-                f'Directory search of {path} failed ({detail})'
+                f"Directory search of {path} failed ({detail})"
             ) from os_error
 
     def locate(self):
