@@ -145,29 +145,29 @@ class FileLocator:
                 parents = [path]
             contents = os.scandir(path)
             for item in contents:
-                target_path = os.path.realpath(item.path)  # Get the target path of the item
-                target_owner_id = os.stat(target_path).st_uid
-                target_owner_name = pwd.getpwuid(target_owner_id).pw_name
-                if (
-                    item.is_symlink()
-                    and target_owner_name in {"root", "nobody"}
-                    and self._is_loop(item.path, parents)
-                ):
+                if item.is_symlink() and self._is_loop(item.path, parents):
                     continue
 
+                link_owner_id = os.lstat(item.path).st_uid
+                link_owner_name = pwd.getpwuid(link_owner_id).pw_name
+                if link_owner_name in {"root", "nobody"}:
+                    log.warning(f"Skipping {item.path} symlink owned by root or nobody")
+                    continue
+
+                target_path = os.path.realpath(item.path)  # Get the target path of the item
                 if item.is_dir():
                     try:
                         yield from self.search_directory(
-                            item.path,
-                            parents + [item.path]
+                            target_path,
+                            parents + [target_path]
                         )
                     except PermissionError:
-                        log.warning(f"Skipping {item.path} due to insufficient permissions")
+                        log.warning(f"Skipping {target_path} due to insufficient permissions")
                 elif item.is_file():
-                    if not self.file_filter.filter(item.path):
+                    if not self.file_filter.filter(target_path):
                         continue
                     self.located_count += 1
-                    yield item.path
+                    yield target_path
         except OSError as os_error:
             detail = str(os_error)
             raise ScanningIoException(
