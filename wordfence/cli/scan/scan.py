@@ -138,38 +138,38 @@ class ScanCommand:
 
     def _initialize_file_filter(self) -> filtering.FileFilter:
         filter = filtering.FileFilter()
-    has_include_overrides = False
+        has_include_overrides = False
 
-    if self.config.include_files is not None:
-        has_include_overrides = True
-        for name in self.config.include_files:
-            filter.add(filtering.filter_filename(name))
-    if self.config.include_files_pattern is not None:
-        has_include_overrides = True
-        for pattern in self.config.include_files_pattern:
-            filter.add(filtering.filter_pattern(pattern))
+        if self.config.include_files is not None:
+            has_include_overrides = True
+            for name in self.config.include_files:
+                filter.add(filtering.filter_filename(name))
+        if self.config.include_files_pattern is not None:
+            has_include_overrides = True
+            for pattern in self.config.include_files_pattern:
+                filter.add(filtering.filter_pattern(pattern))
 
-    if self.config.exclude_files is not None:
-        for name in self.config.exclude_files:
-            filter.add(filtering.filter_filename(name), False)
-    if self.config.exclude_files_pattern is not None:
-        for pattern in self.config.exclude_files_pattern:
-            filter.add(filtering.filter_pattern(pattern), False)
+        if self.config.exclude_files is not None:
+            for name in self.config.exclude_files:
+                filter.add(filtering.filter_filename(name), False)
+        if self.config.exclude_files_pattern is not None:
+            for pattern in self.config.exclude_files_pattern:
+                filter.add(filtering.filter_pattern(pattern), False)
 
-    # Exclude files owned by certain users
-    excluded_users = ["root", "nobody"]
-    filter.add(self._filter_user_ownership(excluded_users), False)
+        # Exclude files owned by certain users
+        excluded_users = ["root", "nobody"]
+        filter.add(self._filter_user_ownership(excluded_users), False)
 
-    # Exclude files in certain paths
-    excluded_path = "./wordfence-cli"
-    filter.add(self._filter_path(excluded_path), False)
+        # Exclude files in certain paths
+        excluded_path = "./wordfence-cli"
+        filter.add(self._filter_path(excluded_path), False)
 
-    if not has_include_overrides:
-        filter.add(filtering.filter_php)
-        filter.add(filtering.filter_html)
-        filter.add(filtering.filter_js)
-        if self.config.images:
-            filter.add(filtering.filter_images)
+        if not has_include_overrides:
+            filter.add(filtering.filter_php)
+            filter.add(filtering.filter_html)
+            filter.add(filtering.filter_js)
+            if self.config.images:
+                filter.add(filtering.filter_images)
 
         return filter
 
