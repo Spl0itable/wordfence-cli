@@ -2,6 +2,8 @@ import sys
 import signal
 import os
 import logging
+import pwd
+import grp
 from multiprocessing import parent_process
 from contextlib import nullcontext
 from typing import Any, Optional
