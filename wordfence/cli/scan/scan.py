@@ -2,8 +2,6 @@ import sys
 import signal
 import os
 import logging
-import pwd
-import grp
 from multiprocessing import parent_process
 from contextlib import nullcontext
 from typing import Any, Optional
@@ -173,23 +171,23 @@ class ScanCommand:
 
     return filter
 
-def _filter_user_ownership(self, excluded_users):
-    def filter_func(file_path):
-        file_stat = os.stat(file_path)
-        file_uid = file_stat.st_uid
-        file_gid = file_stat.st_gid
-        file_owner = pwd.getpwuid(file_uid)[0]
-        file_group = grp.getgrgid(file_gid)[0]
+    def _filter_user_ownership(self, excluded_users):
+        def filter_func(file_path):
+            file_stat = os.stat(file_path)
+            file_uid = file_stat.st_uid
+            file_gid = file_stat.st_gid
+            file_owner = pwd.getpwuid(file_uid)[0]
+            file_group = grp.getgrgid(file_gid)[0]
 
-        return file_owner not in excluded_users and file_group not in excluded_users
+            return file_owner not in excluded_users and file_group not in excluded_users
 
-    return filter_func
+        return filter_func
 
-def _filter_path(self, excluded_path):
-    def filter_func(file_path):
-        return not file_path.startswith(excluded_path)
+    def _filter_path(self, excluded_path):
+        def filter_func(file_path):
+            return not file_path.startswith(excluded_path)
 
-    return filter_func
+        return filter_func
 
     def _get_pcre_options(self) -> pcre.PcreOptions:
         return pcre.PcreOptions(
