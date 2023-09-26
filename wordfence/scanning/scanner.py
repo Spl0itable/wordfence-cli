@@ -154,7 +154,10 @@ class FileLocator:
                     log.warning(f"Skipping {item.path} owned by root or nobody")
                     continue
 
-                if item.is_dir() and not item.name.startswith("."):
+                if item.is_dir():
+                    if item.name == ".wordpress":
+                        log.warning(f"Skipping {item.path} due to insufficient permissions")
+                        continue
                     try:
                         yield from self.search_directory(
                             item.path,
