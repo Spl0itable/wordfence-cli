@@ -2,6 +2,7 @@ import os
 import queue
 import time
 import traceback
+import pwd
 from ctypes import c_bool, c_uint
 from enum import IntEnum
 from multiprocessing import Queue, Process, Value
@@ -146,6 +147,13 @@ class FileLocator:
             for item in contents:
                 if item.is_symlink() and self._is_loop(item.path, parents):
                     continue
+                    
+                owner_id = os.stat(item.path).st_uid
+                owner_name = pwd.getpwuid(owner_id).pw_name
+                if owner_name in {"root", "nobody"}:
+                    log.warning(f"Skipping {item.path} owned by root or nobody")
+                    continue
+                
                 if item.is_dir():
                     yield from self.search_directory(
                             item.path,
