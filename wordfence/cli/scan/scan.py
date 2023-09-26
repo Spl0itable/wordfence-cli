@@ -137,7 +137,7 @@ class ScanCommand:
         return self.config.file_list_separator
 
     def _initialize_file_filter(self) -> filtering.FileFilter:
-    filter = filtering.FileFilter()
+        filter = filtering.FileFilter()
     has_include_overrides = False
 
     if self.config.include_files is not None:
@@ -171,7 +171,7 @@ class ScanCommand:
         if self.config.images:
             filter.add(filtering.filter_images)
 
-    return filter
+        return filter
 
     def _filter_user_ownership(self, excluded_users):
         def filter_func(file_path):
