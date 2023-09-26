@@ -145,20 +145,14 @@ class FileLocator:
                 parents = [path]
             contents = os.scandir(path)
             for item in contents:
-                if item.is_symlink() and self._is_loop(item.path, parents):
-                    continue
-
-                target_path = os.path.realpath(item.path)  # Get the target path of the symbolic link
-                try:
-                    os.listdir(target_path)  # Check if the target directory exists
-                except FileNotFoundError:
-                    log.warning(f"Skipping {item.path} target directory not found")
-                    continue
-
+                target_path = os.path.realpath(item.path)  # Get the target path of the item
                 target_owner_id = os.stat(target_path).st_uid
                 target_owner_name = pwd.getpwuid(target_owner_id).pw_name
-                if target_owner_name in {"root", "nobody"}:
-                    log.warning(f"Skipping {item.path} target directory owned by root or nobody")
+                if (
+                    item.is_symlink()
+                    and target_owner_name in {"root", "nobody"}
+                    and self._is_loop(item.path, parents)
+                ):
                     continue
 
                 if item.is_dir():
