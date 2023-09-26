@@ -143,6 +143,9 @@ class FileLocator:
         try:
             if parents is None:
                 parents = [path]
+            if not os.access(path, os.R_OK | os.X_OK):
+                log.warning(f"Skipping {path} due to insufficient permissions")
+                return
             contents = os.scandir(path)
             for item in contents:
                 if item.is_symlink() and self._is_loop(item.path, parents):
@@ -155,9 +158,6 @@ class FileLocator:
                     continue
 
                 if item.is_dir():
-                    if item.name == ".wordpress":
-                        log.warning(f"Skipping {item.path} due to insufficient permissions")
-                        continue
                     try:
                         yield from self.search_directory(
                             item.path,
