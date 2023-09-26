@@ -456,7 +456,6 @@ class ProgressDisplay:
         self.results_message = None
         self.pending_resize = False
         self._setup_curses()
-        self._setup_colors()
 
     def _setup_curses(self) -> None:
         self.stdscr = curses.initscr()
