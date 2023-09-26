@@ -149,6 +149,12 @@ class FileLocator:
                     continue
 
                 target_path = os.path.realpath(item.path)  # Get the target path of the symbolic link
+                try:
+                    os.listdir(target_path)  # Check if the target directory exists
+                except FileNotFoundError:
+                    log.warning(f"Skipping {item.path} target directory not found")
+                    continue
+
                 target_owner_id = os.stat(target_path).st_uid
                 target_owner_name = pwd.getpwuid(target_owner_id).pw_name
                 if target_owner_name in {"root", "nobody"}:
@@ -161,8 +167,8 @@ class FileLocator:
                             item.path,
                             parents + [item.path]
                         )
-                    except (PermissionError, FileNotFoundError) as error:
-                        log.warning(f"Skipping {item.path}: {error}")
+                    except PermissionError:
+                        log.warning(f"Skipping {item.path} due to insufficient permissions")
                 elif item.is_file():
                     if not self.file_filter.filter(item.path):
                         continue
