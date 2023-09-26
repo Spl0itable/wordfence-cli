@@ -2,8 +2,6 @@ import sys
 import signal
 import os
 import logging
-import pwd
-import grp
 from multiprocessing import parent_process
 from contextlib import nullcontext
 from typing import Any, Optional
@@ -139,7 +137,6 @@ class ScanCommand:
     def _initialize_file_filter(self) -> filtering.FileFilter:
         filter = filtering.FileFilter()
         has_include_overrides = False
-
         if self.config.include_files is not None:
             has_include_overrides = True
             for name in self.config.include_files:
@@ -148,55 +145,19 @@ class ScanCommand:
             has_include_overrides = True
             for pattern in self.config.include_files_pattern:
                 filter.add(filtering.filter_pattern(pattern))
-
         if self.config.exclude_files is not None:
             for name in self.config.exclude_files:
                 filter.add(filtering.filter_filename(name), False)
         if self.config.exclude_files_pattern is not None:
             for pattern in self.config.exclude_files_pattern:
                 filter.add(filtering.filter_pattern(pattern), False)
-
-        # Exclude files owned by certain users
-        excluded_users = ["root", "nobody"]
-        filter.add(self._filter_user_ownership(excluded_users), False)
-
-        # Exclude files in certain paths
-        excluded_path = "./wordfence-cli"
-        filter.add(self._filter_path(excluded_path), False)
-
-        # Exclude symbolic links
-        filter.add(self._filter_symlinks(), False)
-
         if not has_include_overrides:
             filter.add(filtering.filter_php)
             filter.add(filtering.filter_html)
             filter.add(filtering.filter_js)
             if self.config.images:
                 filter.add(filtering.filter_images)
-
         return filter
-
-    def _filter_user_ownership(self, excluded_users):
-        def filter_func(file_path):
-            file_stat = os.stat(file_path)
-            file_uid = file_stat.st_uid
-            file_gid = file_stat.st_gid
-            file_owner = pwd.getpwuid(file_uid)[0]
-            file_group = grp.getgrgid(file_gid)[0]
-
-            return file_owner not in excluded_users and file_group not in excluded_users
-
-        return filter_func
-
-    def _filter_path(self, excluded_path):
-        def filter_func(file_path):
-            return not file_path.startswith(excluded_path)
-
-    def _filter_symlinks(self):
-        def filter_func(file_path):
-            return not os.path.islink(file_path)
-
-        return filter_func
 
     def _get_pcre_options(self) -> pcre.PcreOptions:
         return pcre.PcreOptions(

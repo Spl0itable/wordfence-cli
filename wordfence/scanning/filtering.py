@@ -1,7 +1,5 @@
-import os
-import pwd
-import grp
 import re
+import os
 from typing import Optional, List, Callable, Pattern, AnyStr
 
 
@@ -38,30 +36,6 @@ class FileFilter:
                 else:
                     return False  # Any disallowed condition takes precedence
         return allowed
-
-    def _filter_user_ownership(self, excluded_users):
-        def filter_func(file_path):
-            file_stat = os.stat(file_path)
-            file_uid = file_stat.st_uid
-            file_gid = file_stat.st_gid
-            file_owner = pwd.getpwuid(file_uid)[0]
-            file_group = grp.getgrgid(file_gid)[0]
-
-            return file_owner not in excluded_users and file_group not in excluded_users
-
-        return filter_func
-
-    def _filter_path(self, excluded_path):
-        def filter_func(file_path):
-            return not file_path.startswith(excluded_path)
-
-        return filter_func
-
-    def _filter_symlinks(self):
-        def filter_func(file_path):
-            return not os.path.islink(file_path)
-
-        return filter_func
 
 
 def matches_regex(regex: re.Pattern, string: str) -> bool:
