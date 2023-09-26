@@ -462,6 +462,7 @@ class ProgressDisplay:
         curses.noecho()
         curses.curs_set(0)
         self.terminal_size = os.get_terminal_size()
+        self._setup_colors()  # Call this before _initialize_content
         self._initialize_content(self.terminal_size)
 
     def _initialize_content(self, size: os.terminal_size) -> None:
