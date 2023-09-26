@@ -143,11 +143,7 @@ class FileLocator:
         try:
             if parents is None:
                 parents = [path]
-            try:
-                contents = os.scandir(path)
-            except PermissionError:
-                log.warning(f"Skipping {path} due to insufficient permissions")
-                return
+            contents = os.scandir(path)
             for item in contents:
                 if item.is_symlink() and self._is_loop(item.path, parents):
                     continue
@@ -159,10 +155,13 @@ class FileLocator:
                     continue
 
                 if item.is_dir():
-                    yield from self.search_directory(
-                        item.path,
-                        parents + [item.path]
-                    )
+                    try:
+                        yield from self.search_directory(
+                            item.path,
+                            parents + [item.path]
+                        )
+                    except PermissionError:
+                        log.warning(f"Skipping {item.path} due to insufficient permissions")
                 elif item.is_file():
                     if not self.file_filter.filter(item.path):
                         continue
