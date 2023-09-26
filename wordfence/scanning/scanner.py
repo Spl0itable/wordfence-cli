@@ -161,8 +161,8 @@ class FileLocator:
                             item.path,
                             parents + [item.path]
                         )
-                    except PermissionError:
-                        log.warning(f"Skipping {item.path} due to insufficient permissions")
+                    except (PermissionError, FileNotFoundError) as error:
+                        log.warning(f"Skipping {item.path}: {error}")
                 elif item.is_file():
                     if not self.file_filter.filter(item.path):
                         continue
