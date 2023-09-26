@@ -156,6 +156,8 @@ class FileLocator:
 
                 if item.is_dir():
                     try:
+                        if item.path == path:
+                            os.listdir(item.path)  # Check permissions for root directory
                         yield from self.search_directory(
                             item.path,
                             parents + [item.path]
