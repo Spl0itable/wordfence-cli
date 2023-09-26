@@ -148,25 +148,25 @@ class FileLocator:
                 if item.is_symlink() and self._is_loop(item.path, parents):
                     continue
 
-                try:
-                    owner_id = os.stat(item.path).st_uid
-                    owner_name = pwd.getpwuid(owner_id).pw_name
-                    if owner_name != pwd.getpwuid(os.getuid()).pw_name:
-                        log.warning(f"Skipping {item.path} not owned by current user")
-                        continue
+                owner_id = os.stat(item.path).st_uid
+                owner_name = pwd.getpwuid(owner_id).pw_name
+                if owner_name in {"root", "nobody"}:
+                    log.warning(f"Skipping {item.path} owned by root or nobody")
+                    continue
 
-                    if item.is_dir():
+                if item.is_dir():
+                    try:
                         yield from self.search_directory(
                             item.path,
                             parents + [item.path]
                         )
-                    elif item.is_file():
-                        if not self.file_filter.filter(item.path):
-                            continue
-                        self.located_count += 1
-                        yield item.path
-                except (PermissionError, FileNotFoundError) as error:
-                    log.warning(f"Skipping {item.path}: {error}")
+                    except PermissionError:
+                        log.warning(f"Skipping {item.path} due to insufficient permissions")
+                elif item.is_file():
+                    if not self.file_filter.filter(item.path):
+                        continue
+                    self.located_count += 1
+                    yield item.path
         except OSError as os_error:
             detail = str(os_error)
             raise ScanningIoException(
