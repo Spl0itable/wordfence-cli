@@ -143,18 +143,16 @@ class FileLocator:
         try:
             if parents is None:
                 parents = [path]
-            if not os.access(path, os.R_OK | os.X_OK):
-                log.warning(f"Skipping {path} due to insufficient permissions")
-                return
             contents = os.scandir(path)
             for item in contents:
                 if item.is_symlink() and self._is_loop(item.path, parents):
                     continue
 
-                owner_id = os.stat(item.path).st_uid
-                owner_name = pwd.getpwuid(owner_id).pw_name
-                if owner_name in {"root", "nobody"}:
-                    log.warning(f"Skipping {item.path} owned by root or nobody")
+                target_path = os.path.realpath(item.path)  # Get the target path of the symbolic link
+                target_owner_id = os.stat(target_path).st_uid
+                target_owner_name = pwd.getpwuid(target_owner_id).pw_name
+                if target_owner_name in {"root", "nobody"}:
+                    log.warning(f"Skipping {item.path} target directory owned by root or nobody")
                     continue
 
                 if item.is_dir():
