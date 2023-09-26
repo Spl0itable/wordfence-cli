@@ -137,28 +137,42 @@ class ScanCommand:
     def _initialize_file_filter(self) -> filtering.FileFilter:
         filter = filtering.FileFilter()
         has_include_overrides = False
+
         if self.config.include_files is not None:
             has_include_overrides = True
             for name in self.config.include_files:
                 filter.add(filtering.filter_filename(name))
+            
         if self.config.include_files_pattern is not None:
             has_include_overrides = True
             for pattern in self.config.include_files_pattern:
                 filter.add(filtering.filter_pattern(pattern))
+
         if self.config.exclude_files is not None:
             for name in self.config.exclude_files:
-                filter.add(filtering.filter_filename(name), False)
+                if os.path.isdir(name):
+                    filter.add(filtering.filter_directory(name), False)
+                else:
+                    filter.add(filtering.filter_filename(name), False)
+        
         if self.config.exclude_files_pattern is not None:
             for pattern in self.config.exclude_files_pattern:
                 filter.add(filtering.filter_pattern(pattern), False)
+        
         if not has_include_overrides:
             filter.add(filtering.filter_php)
             filter.add(filtering.filter_html)
             filter.add(filtering.filter_js)
             if self.config.images:
                 filter.add(filtering.filter_images)
+        
         return filter
 
+    def filter_directory(dir_name):
+        def is_in_directory(file_name):
+            return file_name.startswith(dir_name)
+        return is_in_directory
+    
     def _get_pcre_options(self) -> pcre.PcreOptions:
         return pcre.PcreOptions(
                     caseless=True,
