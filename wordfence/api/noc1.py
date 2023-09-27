@@ -82,5 +82,9 @@ class Client(NocClient):
         return SignatureSet(common_strings, signatures, self.license)
 
     def ping_api_key(self) -> bool:
-    # Return a value indicating successful key ping without making an actual request
-        return True
+        response = self.request('ping_api_key')
+        validator = DictionaryValidator({
+                'ok': int
+            })
+        self.validate_response(response, validator)
+        return bool(response['ok'])
