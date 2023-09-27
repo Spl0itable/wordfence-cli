@@ -651,11 +651,20 @@ class ProgressDisplay:
                 pass
 
     def scan_finished_handler(
-                self, metrics: ScanMetrics,
-                timer: timing.Timer
-            ) -> None:
+        self, metrics: ScanMetrics,
+        timer: timing.Timer
+    ) -> None:
         messages = default_scan_finished_handler(metrics, timer)
         self.results_message = messages.results
         self.log_box.add_message('Scan completed! Press any key to exit. View scan results in "scan-results-" CSV file saved in doc root')
         self._move_cursor_to_log_end()
         curses.curs_set(1)
+
+        # Set green color attribute
+        self.log_box.win.attron(curses.color_pair(2))
+
+        # Print the success message in green
+        self.log_box.add_message('Scan completed! Press any key to exit. View scan results in "scan-results-" CSV file saved in doc root')
+
+        # Turn off the green color attribute
+        self.log_box.win.attroff(curses.color_pair(2))
