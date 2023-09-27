@@ -661,10 +661,10 @@ class ProgressDisplay:
         curses.curs_set(1)
 
         # Set green color attribute
-        self.log_box.win.attron(curses.color_pair(2))
+        self.log_box.window.attron(curses.color_pair(2))
 
         # Print the success message in green
         self.log_box.add_message('Scan completed! Press any key to exit. View scan results in "scan-results-" CSV file saved in doc root')
 
         # Turn off the green color attribute
-        self.log_box.win.attroff(curses.color_pair(2))
+        self.log_box.window.attroff(curses.color_pair(2))
