@@ -656,6 +656,6 @@ class ProgressDisplay:
             ) -> None:
         messages = default_scan_finished_handler(metrics, timer)
         self.results_message = messages.results
-        self.log_box.add_message('Scan completed! Press any key to exit.')
+        self.log_box.add_message('Scan completed! Press any key to exit. View scan results in "scan-results-" CSV file saved in doc root')
         self._move_cursor_to_log_end()
         curses.curs_set(1)
