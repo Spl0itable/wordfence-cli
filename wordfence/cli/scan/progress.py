@@ -344,10 +344,13 @@ class LogBox(Box):
         self.cursor_offset = Position(last_line_number, last_line_length)
 
     def add_message(self, message: str) -> None:
-        self.messages.append(filter_control_characters(message))
-        if '/www/' in message:
-            self.has_file_paths = True
-        self.update()
+        filtered_message = filter_control_characters(message)
+        self.messages.append(filtered_message)
+        if '/www/' in filtered_message:
+            self.update()
+        else:
+            self.has_file_paths = False
+            self.update()
 
     def get_cursor_position(self) -> Position:
         y = 0
