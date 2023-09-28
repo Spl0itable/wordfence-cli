@@ -476,11 +476,12 @@ class ProgressDisplay:
     METRICS_COUNT = 5
     MIN_MESSAGE_BOX_HEIGHT = 4
 
-    def __init__(self, worker_count: int):
+    def __init__(self, worker_count: int, stdscr: curses.window):
         _displays.append(self)
         self.worker_count = worker_count
         self.results_message = None
         self.pending_resize = False
+        self.stdscr = stdscr
         self._setup_curses()
 
     def _setup_curses(self) -> None:
