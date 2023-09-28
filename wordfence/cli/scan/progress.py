@@ -238,20 +238,18 @@ DEFAULT_MAX_MESSAGES = 512
 
 
 class LogBox(Box):
-
     def __init__(
-                self,
-                columns: int,
-                lines: int,
-                max_messages: int = 0,
-                parent: Optional[curses.window] = None
-            ):
+        self,
+        columns: int,
+        lines: int,
+        max_messages: int = 0,
+        parent: Optional[curses.window] = None,
+    ):
         self.columns = columns
         self.lines = lines
-        self.messages = deque(
-                maxlen=self._determine_max_messages(max_messages)
-            )
+        self.messages = deque(maxlen=self._determine_max_messages(max_messages))
         self.cursor_position = None
+        self.has_file_paths = False  # Track if there are lines with file paths
         super().__init__(parent, border=True)
 
     def _determine_max_messages(self, max_messages: int = 0) -> Optional[int]:
@@ -332,11 +330,23 @@ class LogBox(Box):
             self.window.addstr(offset, offset, message)
             self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
             line_number += 1
+        else:
+            # Write the "No malware found :)" message in green color
+            message = "No malware found :)"
+            GREEN_TEXT = 3
+            BOLD_TEXT = curses.A_BOLD
+            curses.init_pair(GREEN_TEXT, curses.COLOR_GREEN, curses.COLOR_BLACK)
+            self.window.attron(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)
+            self.window.addstr(offset, offset, message)
+            self.window.attroff(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)
+            line_number += 1
 
         self.cursor_offset = Position(last_line_number, last_line_length)
 
     def add_message(self, message: str) -> None:
         self.messages.append(filter_control_characters(message))
+        if '/www/' in message:
+            self.has_file_paths = True
         self.update()
 
     def get_cursor_position(self) -> Position:
