@@ -2,6 +2,7 @@ import curses
 import logging
 import signal
 import os
+import re
 from typing import List, Optional, Deque
 from logging import Handler
 from collections import deque, namedtuple

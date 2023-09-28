@@ -1,5 +1,4 @@
 import csv
-import re
 from typing import IO, List, Any
 from enum import Enum
 
