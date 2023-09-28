@@ -298,16 +298,6 @@ class LogBox(Box):
         curses.init_pair(CYAN_TEXT, curses.COLOR_CYAN, curses.COLOR_BLACK)
         curses.init_pair(YELLOW_TEXT, curses.COLOR_YELLOW, curses.COLOR_BLACK)
 
-        # Save the current color pair and attribute
-        saved_color_pair = curses.color_pair(0)
-        saved_attribute = curses.A_NORMAL
-
-        # Add the first line as "Possible malicious files found:" in cyan color
-        self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
-        self.window.addstr(line_number, offset, "Possible malicious files found:")
-        self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
-        line_number += 1
-
         for line in self._map_messages_to_lines(offset):
             last_line_number = line_number
             last_line_length = len(line)
@@ -324,6 +314,11 @@ class LogBox(Box):
                     self.window.addstr(' "')
                     # Write the log message
                     self.window.addstr(log_message)
+                elif line_number == offset:
+                    # Enable the color pair and bold attribute for the first line (cyan)
+                    self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
+                    self.window.addstr(line_number, offset, line)
+                    self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
                 else:
                     # Write the line as is
                     self.window.addstr(line_number, offset, line)
@@ -332,8 +327,7 @@ class LogBox(Box):
                 self.window.addstr(line_number, offset, line)
             line_number += 1
 
-        # Restore the saved color pair and attribute
-        self.window.attron(saved_color_pair | saved_attribute)
+        self.window.attron(curses.color_pair(0) | curses.A_NORMAL)
 
     def add_message(self, message: str) -> None:
         self.messages.append(filter_control_characters(message))
