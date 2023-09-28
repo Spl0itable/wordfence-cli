@@ -657,7 +657,6 @@ class ProgressDisplay:
         messages = default_scan_finished_handler(metrics, timer)
         self.results_message = messages.results
         success_message = 'Scan completed! Press any key to exit. View scan results in "scan-results-" CSV file saved in doc root'
-        self.log_box.add_message(success_message)
         self._move_cursor_to_log_end()
         curses.curs_set(1)
 
@@ -666,10 +665,10 @@ class ProgressDisplay:
         curses.init_pair(GREEN_TEXT, curses.COLOR_GREEN, curses.COLOR_BLACK)
 
         # Enable the color pair
-        self.log_box.window.attron(curses.color_pair(GREEN_TEXT))
+        self.stdscr.attron(curses.color_pair(GREEN_TEXT))
 
         # Print the success message in green
-        self.log_box.window.addstr(len(self.log_box.messages) - 1, 0, success_message)
+        self.stdscr.addstr(self.log_box.position.y + len(self.log_box.messages) - 1, self.log_box.position.x + 1, success_message)
 
         # Disable the color pair
-        self.log_box.window.attroff(curses.color_pair(GREEN_TEXT))
+        self.stdscr.attroff(curses.color_pair(GREEN_TEXT))
