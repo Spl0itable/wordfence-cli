@@ -323,10 +323,8 @@ class LogBox(Box):
                     # Write the log message
                     self.window.addstr(log_message)
                 else:
-                    # Enable the color pair and bold attribute for the line (cyan)
-                    self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
+                    # Write the whole line as is (without using cyan color)
                     self.window.addstr(line_number, offset, line)
-                    self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
             except ValueError:
                 # Delimiter not found, write the line as is
                 self.window.addstr(line_number, offset, line)
