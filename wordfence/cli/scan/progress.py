@@ -301,8 +301,8 @@ class LogBox(Box):
         # Write the "Possible malicious files found:" message in cyan color
         message = "Possible malicious file(s) found:"
         self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
-        self.window.addstr(line_number, offset, message)
         self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
+        self.window.addstr(line_number, offset, message)
         line_number += 1
 
         for line in self._map_messages_to_lines(offset):
