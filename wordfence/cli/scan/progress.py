@@ -583,7 +583,7 @@ class ProgressDisplay:
                     parent=self.stdscr
                 )
             boxes.append(box)
-        return []
+        return boxes
 
     def _initialize_log_box(self) -> LogBox:
         log_box = LogBox(
