@@ -300,6 +300,10 @@ class LogBox(Box):
         self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
         line_number += 1
 
+        # Save the current color pair and attribute
+        saved_color_pair = curses.color_pair(0)
+        saved_attribute = curses.A_NORMAL
+
         for line in self._map_messages_to_lines(offset):
             last_line_number = line_number
             last_line_length = len(line)
@@ -329,8 +333,8 @@ class LogBox(Box):
                 self.window.addstr(line_number, offset, line)
             line_number += 1
 
-        # Disable the cyan color
-        self.window.attron(curses.color_pair(0) | curses.A_NORMAL)
+        # Restore the saved color pair and attribute
+        self.window.attron(saved_color_pair | saved_attribute)
 
         self.cursor_offset = Position(last_line_number, last_line_length)
 
