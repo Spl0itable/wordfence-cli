@@ -299,7 +299,7 @@ class LogBox(Box):
         curses.init_pair(YELLOW_TEXT, curses.COLOR_YELLOW, curses.COLOR_BLACK)
 
         # Write the "Possible malicious files found:" message in cyan color
-        message = "Possible malicious files found:"
+        message = "Possible malicious file(s) found:"
         self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
         self.window.addstr(line_number, offset, message)
         self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
@@ -329,9 +329,6 @@ class LogBox(Box):
                 # Delimiter not found, write the line as is
                 self.window.addstr(line_number, offset, line)
             line_number += 1
-
-        # Disable the cyan color for the "Possible malicious files found:" message
-        self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
 
         self.cursor_offset = Position(last_line_number, last_line_length)
 
