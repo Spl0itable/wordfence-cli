@@ -48,6 +48,7 @@ class ReportWriter:
 
 
 class CsvReportWriter(ReportWriter):
+    FILENAME_REGEX = r"(?<=\s)([^\s/]+\.[a-zA-Z]{2,4})(?=\s)"
 
     def initialize(self):
         self.writer = csv.writer(self._target, delimiter=self.get_delimiter())
@@ -56,11 +57,18 @@ class CsvReportWriter(ReportWriter):
         return ' '
 
     def write_row(self, data: List[str]) -> None:
-        self.writer.writerow(data)
+        highlighted_row = [self.highlight_filenames(item) for item in data]
+        self.writer.writerow(highlighted_row)
+
+    def highlight_filenames(self, item):
+        filename_regex = re.compile(self.FILENAME_REGEX)
+        return filename_regex.sub(
+            r"\033[91m\1\033[0m",
+            item
+        )
 
 
 class TsvReportWriter(CsvReportWriter):
-
     def get_delimiter(self) -> str:
         return '\t'
 
