@@ -86,6 +86,9 @@ class HumanReadableWriter(ReportWriter):
         super().__init__(target)
         self._columns = columns
 
+    def _get_value(data: List[str], column: str) -> str:
+        return
+
     def _map_data_to_dict(self, data: List[str]) -> dict:
         return {
             name: data[index] for index, name in enumerate(self._columns)
@@ -93,19 +96,26 @@ class HumanReadableWriter(ReportWriter):
 
     def write_row(self, data: List[str]) -> None:
         values = self._map_data_to_dict(data)
-        file = values.get('filename')  # Get the filename from the values dictionary
-
-        # Enable the red color attribute
-        self._target.attron(curses.color_pair(curses.COLOR_RED))
-
+        file = None
+        signature_id = None
+        if 'filename' in values:
+            file = values['filename']
+        if 'signature_id' in values:
+            signature_id = values['signature_id']
+        # TODO: Add more custom messages if desired
         if file is not None:
-            self._target.addstr(f"File at {file} matched a signature")  # Print the red-colored filename
+            if signature_id is not None:
+                self._target.write(
+                        f"File at {file} matched signature {signature_id}"
+                    )
+            else:
+                self._target.write(
+                        f"File {file} matched a signature"
+                    )
         else:
-            self._target.addstr("Match found: " + str(values))
-
-        # Disable the red color attribute
-        self._target.attroff(curses.color_pair(curses.COLOR_RED))
-
+            self._target.write(
+                    "Match found: " + str(values)
+                )
         self._target.write("\n")
 
     def allows_headers(self) -> bool:
