@@ -304,10 +304,10 @@ class LogBox(Box):
                     YELLOW_TEXT = 2
                     curses.init_pair(YELLOW_TEXT, curses.COLOR_YELLOW, curses.COLOR_BLACK)
 
-                    # Enable the color pair for the file path
-                    self.window.attron(curses.color_pair(YELLOW_TEXT))
+                    # Enable the color pair and bold attribute for the file path
+                    self.window.attron(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
                     self.window.addstr(line_number, offset, file_path)
-                    self.window.attroff(curses.color_pair(YELLOW_TEXT))
+                    self.window.attroff(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
                     # Write the delimiter with default text color
                     self.window.addstr(' "')
                     # Write the log message
