@@ -321,9 +321,9 @@ class LogBox(Box):
             line_number += 1
         self.cursor_offset = Position(last_line_number, last_line_length)
 
-        def add_message(self, message: str) -> None:
-            self.messages.append(filter_control_characters(message))
-            self.update()
+    def add_message(self, message: str) -> None:
+        self.messages.append(filter_control_characters(message))
+        self.update()
 
     def get_cursor_position(self) -> Position:
         y = 0
