@@ -329,27 +329,14 @@ class LogBox(Box):
 
 
 class LogBoxHandler(Handler):
-    def __init__(self, log_box: LogBox, stdscr: curses.window):
-        super().__init__()
+
+    def __init__(self, log_box: LogBox):
         self.log_box = log_box
-        self.stdscr = stdscr
+        Handler.__init__(self)
 
     def emit(self, record):
-        message = self.format(record)
-        if 'filename' in message:
-            # Enable the red color attribute
-            self.stdscr.attron(curses.color_pair(curses.COLOR_RED))
-
-            # Print the message with the red-colored filename
-            self.stdscr.addstr(message.replace('filename', ''), curses.color_pair(curses.COLOR_RED))
-
-            # Disable the red color attribute
-            self.stdscr.attroff(curses.color_pair(curses.COLOR_RED))
-        else:
-            self.stdscr.addstr(message)
-        self.stdscr.addstr('\n')
-        self.stdscr.refresh()
-        self.log_box.update()
+        self.log_box.add_message(record.getMessage())
+        pass
 
 
 class LogBoxStream():
@@ -650,7 +637,7 @@ class ProgressDisplay:
                 ) from e
 
     def get_log_handler(self) -> logging.Handler:
-        return LogBoxHandler(self.log_box, self.stdscr)
+        return LogBoxHandler(self.log_box)
 
     def get_output_stream(self) -> LogBoxStream:
         return LogBoxStream(self.log_box)
