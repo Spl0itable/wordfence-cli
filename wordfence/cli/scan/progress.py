@@ -331,7 +331,11 @@ class LogBox(Box):
             self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
             line_number += 1
         else:
-            # Write the "No malware found :)" message in green color
+            # Clear the area where the "No malware found :)" message would be displayed
+            self.window.addstr(offset, offset, ' ' * self.columns)
+
+        # Write the "No malware found :)" message in green color only if there are no file paths
+        if not has_file_paths:
             message = "No malware found :)"
             GREEN_TEXT = 3
             BOLD_TEXT = curses.A_BOLD
