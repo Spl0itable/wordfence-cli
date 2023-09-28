@@ -2,6 +2,7 @@ import curses
 import logging
 import signal
 import os
+import re
 from typing import List, Optional, Deque
 from logging import Handler
 from collections import deque, namedtuple
@@ -295,12 +296,23 @@ class LogBox(Box):
             last_line_number = line_number
             last_line_length = len(line)
             line = line.ljust(self.columns)
+
+            # Apply red color to file paths starting with "/www/"
+            if line.startswith('/www/'):
+                line = self.colorize(line, curses.COLOR_RED)
+
             try:
                 self.window.addstr(line_number, offset, line)
             except Exception:
                 break
             line_number += 1
         self.cursor_offset = Position(last_line_number, last_line_length)
+
+    def colorize(self, string, color):
+        self.window.attron(color)
+        self.window.addstr(string)
+        self.window.attroff(color)
+        return ""
 
     def add_message(self, message: str) -> None:
         self.messages.append(filter_control_characters(message))
