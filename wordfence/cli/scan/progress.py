@@ -292,17 +292,17 @@ class LogBox(Box):
         last_line_number = line_number
         last_line_length = 0
 
-        # Add the first line as "Possible malicious files found:" in cyan color
+        # Define color pairs for cyan and yellow
         CYAN_TEXT = 3
+        YELLOW_TEXT = 4
         curses.init_pair(CYAN_TEXT, curses.COLOR_CYAN, curses.COLOR_BLACK)
+        curses.init_pair(YELLOW_TEXT, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+
+        # Add the first line as "Possible malicious files found:" in cyan color
         self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
         self.window.addstr(line_number, offset, "Possible malicious files found:")
         self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
         line_number += 1
-
-        # Save the current color pair and attribute
-        saved_color_pair = curses.color_pair(0)
-        saved_attribute = curses.A_NORMAL
 
         for line in self._map_messages_to_lines(offset):
             last_line_number = line_number
@@ -313,11 +313,7 @@ class LogBox(Box):
                 file_path, log_message = line.split(' "', 1)
                 # Check if the file path starts with "/www/"
                 if file_path.startswith('/www/'):
-                    # Define color pair for the file path
-                    YELLOW_TEXT = 2
-                    curses.init_pair(YELLOW_TEXT, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-
-                    # Enable the color pair and bold attribute for the file path
+                    # Enable the color pair and bold attribute for the file path (yellow)
                     self.window.attron(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
                     self.window.addstr(line_number, offset, file_path)
                     self.window.attroff(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
@@ -333,8 +329,8 @@ class LogBox(Box):
                 self.window.addstr(line_number, offset, line)
             line_number += 1
 
-        # Restore the saved color pair and attribute
-        self.window.attron(saved_color_pair | saved_attribute)
+        # Disable the colors
+        self.window.attron(curses.color_pair(0) | curses.A_NORMAL)
 
         self.cursor_offset = Position(last_line_number, last_line_length)
 
