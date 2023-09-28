@@ -13,6 +13,11 @@ from ..banner.banner import get_welcome_banner
 from ...util import timing
 from ...util.unicode import filter_control_characters
 
+# Create the standard screen window
+stdscr = curses.initscr()
+
+# Create an instance of ProgressDisplay with the stdscr argument
+progress_display = ProgressDisplay(worker_count, stdscr)
 
 class ProgressException(Exception):
     pass
