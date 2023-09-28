@@ -250,6 +250,7 @@ class LogBox(Box):
         self.messages = deque(maxlen=self._determine_max_messages(max_messages))
         self.cursor_position = None
         self.has_file_paths = False  # Track if there are lines with file paths
+        self.scan_complete = False  # Track if the scan has completed
         super().__init__(parent, border=True)
 
     def _determine_max_messages(self, max_messages: int = 0) -> Optional[int]:
@@ -330,12 +331,12 @@ class LogBox(Box):
             self.window.addstr(offset, offset, message)
             self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
             line_number += 1
-        else:
+        elif self.scan_complete:
             # Clear the area where the "No malware found :)" message would be displayed
             self.window.addstr(offset, offset, ' ' * self.columns)
 
-        # Write the "No malware found :)" message in green color only if there are no file paths
-        if not has_file_paths:
+        # Write the "No malware found :)" message in green color only if there are no file paths and the scan is complete
+        if not has_file_paths and self.scan_complete:
             message = "No malware found :)"
             GREEN_TEXT = 3
             BOLD_TEXT = curses.A_BOLD
@@ -351,10 +352,10 @@ class LogBox(Box):
         filtered_message = filter_control_characters(message)
         self.messages.append(filtered_message)
         if '/www/' in filtered_message:
-            self.update()
-        else:
-            self.has_file_paths = False
-            self.update()
+            self.has_file_paths = True
+        if 'Scan complete' in filtered_message:
+            self.scan_complete = True
+        self.update()
 
     def get_cursor_position(self) -> Position:
         y = 0
@@ -701,8 +702,7 @@ class ProgressDisplay:
                 pass
 
     def scan_finished_handler(
-        self, metrics: ScanMetrics,
-        timer: timing.Timer
+        self, metrics: ScanMetrics, timer: timing.Timer
     ) -> None:
         messages = default_scan_finished_handler(metrics, timer)
         self.results_message = messages.results
@@ -722,3 +722,7 @@ class ProgressDisplay:
 
         # Disable the color pair and bold attribute for the success message
         self.stdscr.attroff(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
+
+        # Set the scan completion flag and update the log box content
+        self.log_box.scan_complete = True
+        self.log_box.update()
