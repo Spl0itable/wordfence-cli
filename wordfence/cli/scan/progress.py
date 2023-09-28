@@ -298,12 +298,8 @@ class LogBox(Box):
             try:
                 # Split the line into columns
                 columns = line.split(', ')
-                # Set the color for the first column
-                self.window.attron(curses.color_pair(curses.COLOR_RED))
                 # Write the first column with red text color
-                self.window.addstr(line_number, offset, columns[0])
-                # Reset the color
-                self.window.attroff(curses.color_pair(curses.COLOR_RED))
+                self.window.addstr(line_number, offset, columns[0], curses.color_pair(curses.COLOR_RED))
                 # Write the remaining columns
                 for i in range(1, len(columns)):
                     self.window.addstr(line_number, offset + len(columns[i-1]) + 2, columns[i])
