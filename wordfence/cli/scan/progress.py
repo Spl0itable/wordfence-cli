@@ -706,7 +706,6 @@ class ProgressDisplay:
     ) -> None:
         messages = default_scan_finished_handler(metrics, timer)
         self.results_message = messages.results
-        success_message = 'Scan completed! Press any key to exit. View scan results in "scan-results-" CSV file saved to doc root.'
         self._move_cursor_to_log_end()
         curses.curs_set(1)
 
@@ -715,6 +714,11 @@ class ProgressDisplay:
         BOLD_TEXT = curses.A_BOLD
         curses.init_pair(GREEN_TEXT, curses.COLOR_GREEN, curses.COLOR_BLACK)
         self.stdscr.attron(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
+
+        # Modify the success message based on whether file paths are present
+        success_message = 'Scan completed! Press any key to exit.'
+        if not self.log_box.has_file_paths and self.log_box.scan_complete:
+            success_message += ' View scan results in "scan-results-" CSV file saved to doc root.'
 
         # Print the success message in green and bold
         success_y = self.log_box.position.y + self.log_box.get_height() - 1
