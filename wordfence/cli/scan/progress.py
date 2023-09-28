@@ -563,7 +563,7 @@ class ProgressDisplay:
             raise ValueError("Metrics count is out of sync")
         return metrics
 
-    def _initialize_metric_boxes(self) -> None:
+    def _initialize_metric_boxes(self) -> List[MetricBox]:
         default_metrics = ScanMetrics(self.worker_count)
         default_update = ScanProgressUpdate(
                 elapsed_time=0,
@@ -583,6 +583,7 @@ class ProgressDisplay:
                     parent=self.stdscr
                 )
             boxes.append(box)
+        return None
 
     def _initialize_log_box(self) -> LogBox:
         log_box = LogBox(
