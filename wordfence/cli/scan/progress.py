@@ -303,8 +303,6 @@ class LogBox(Box):
         self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
         self.window.addstr(line_number, offset, message)
         self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
-        # Write the delimiter with default text color
-        self.window.addstr(' "', curses.color_pair(0))
         line_number += 1
 
         for line in self._map_messages_to_lines(offset):
@@ -694,12 +692,13 @@ class ProgressDisplay:
 
         # Enable the color pair for the success message
         GREEN_TEXT = 3
+        BOLD_TEXT = curses.A_BOLD
         curses.init_pair(GREEN_TEXT, curses.COLOR_GREEN, curses.COLOR_BLACK)
-        self.stdscr.attron(curses.color_pair(GREEN_TEXT))
+        self.stdscr.attron(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
 
-        # Print the success message in green
+        # Print the success message in green and bold
         success_y = self.log_box.position.y + self.log_box.get_height() - 1
         self.stdscr.addstr(success_y, self.log_box.position.x + 1, success_message)
 
-        # Disable the color pair for the success message
-        self.stdscr.attroff(curses.color_pair(GREEN_TEXT))
+        # Disable the color pair and bold attribute for the success message
+        self.stdscr.attroff(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
