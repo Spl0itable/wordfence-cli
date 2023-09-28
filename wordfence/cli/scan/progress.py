@@ -302,13 +302,16 @@ class LogBox(Box):
                 if file_path.startswith('/www/'):
                     # Write the file path with red text color
                     self.window.addstr(line_number, offset, file_path, curses.color_pair(curses.COLOR_RED))
+                    # Write the delimiter with default text color
+                    self.window.addstr(' "')
                     # Write the log message
                     self.window.addstr(log_message)
                 else:
                     # Write the line as is
                     self.window.addstr(line_number, offset, line)
-            except Exception:
-                break
+            except ValueError:
+                # Delimiter not found, write the line as is
+                self.window.addstr(line_number, offset, line)
             line_number += 1
         self.cursor_offset = Position(last_line_number, last_line_length)
 
