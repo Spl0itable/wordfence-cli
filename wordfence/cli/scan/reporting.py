@@ -1,5 +1,5 @@
 import csv
-import re
+import curses
 from typing import IO, List, Any
 from enum import Enum
 
@@ -63,10 +63,10 @@ class CsvReportWriter(ReportWriter):
 
     def highlight_filenames(self, item):
         filename_regex = re.compile(self.FILENAME_REGEX)
-        return filename_regex.sub(
-            r"\033[91m\1\033[0m",
+        return curses.color_pair(1) + filename_regex.sub(
+            r"\1",
             item
-        )
+        ) + curses.color_pair(0)
 
 
 class TsvReportWriter(CsvReportWriter):
