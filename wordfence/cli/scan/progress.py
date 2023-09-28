@@ -292,11 +292,15 @@ class LogBox(Box):
         last_line_number = line_number
         last_line_length = 0
 
-        # Define color pairs for cyan and yellow
+        # Define color pair for cyan
         CYAN_TEXT = 3
-        YELLOW_TEXT = 4
         curses.init_pair(CYAN_TEXT, curses.COLOR_CYAN, curses.COLOR_BLACK)
-        curses.init_pair(YELLOW_TEXT, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+
+        # Enable the color pair and bold attribute for the first line (cyan)
+        self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
+        self.window.addstr(line_number, offset, "Possible malicious files found:")
+        self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
+        line_number += 1
 
         for line in self._map_messages_to_lines(offset):
             last_line_number = line_number
@@ -306,6 +310,10 @@ class LogBox(Box):
                 # Split the line into the file path and the log message
                 file_path, log_message = line.split(' "', 1)
                 if file_path.startswith('/www/'):
+                    # Define color pair for yellow
+                    YELLOW_TEXT = 4
+                    curses.init_pair(YELLOW_TEXT, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+
                     # Enable the color pair and bold attribute for the file path (yellow)
                     self.window.attron(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
                     self.window.addstr(line_number, offset, file_path)
@@ -314,11 +322,6 @@ class LogBox(Box):
                     self.window.addstr(' "')
                     # Write the log message
                     self.window.addstr(log_message)
-                elif line_number == offset:
-                    # Enable the color pair and bold attribute for the first line (cyan)
-                    self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
-                    self.window.addstr(line_number, offset, line)
-                    self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
                 else:
                     # Write the line as is
                     self.window.addstr(line_number, offset, line)
@@ -329,8 +332,8 @@ class LogBox(Box):
 
         self.window.attron(curses.color_pair(0) | curses.A_NORMAL)
 
-    def add_message(self, message: str) -> None:
-        self.messages.append(filter_control_characters(message))
+        def add_message(self, message: str) -> None:
+            self.messages.append(filter_control_characters(message))
         self.update()
 
     def get_cursor_position(self) -> Position:
