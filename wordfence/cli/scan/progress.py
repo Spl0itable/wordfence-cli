@@ -319,7 +319,7 @@ class LogBox(Box):
                     self.window.addstr(line_number, offset, file_path)
                     self.window.attroff(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
                     # Write the delimiter with default text color
-                    self.window.addstr(' "')
+                    self.window.addstr(' "', curses.color_pair(0))
                     # Write the log message
                     self.window.addstr(log_message)
                 else:
