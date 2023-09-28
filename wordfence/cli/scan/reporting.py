@@ -49,6 +49,8 @@ class ReportWriter:
         return True
 
 
+import curses
+
 class CsvReportWriter(ReportWriter):
     FILENAME_REGEX = r"(?<=\s)([^\s/]+\.[a-zA-Z]{2,4})(?=\s)"
 
@@ -64,10 +66,10 @@ class CsvReportWriter(ReportWriter):
 
     def highlight_filenames(self, item):
         filename_regex = re.compile(self.FILENAME_REGEX)
-        return curses.color_pair(1) + filename_regex.sub(
-            r"\1",
+        return filename_regex.sub(
+            lambda match: curses.color_pair(1) + match.group(1) + curses.color_pair(0),
             item
-        ) + curses.color_pair(0)
+        )
 
 
 class TsvReportWriter(CsvReportWriter):
