@@ -663,8 +663,17 @@ class ProgressDisplay:
         # Set green color attribute
         self.stdscr.attron(curses.color_pair(2))
 
-        # Print the success message in green
+        # Save the current color attribute
+        old_attr = self.stdscr.getattr()
+
+        # Change the color to green
+        self.stdscr.attron(curses.color_pair(2))
+
+        # Print the success message
         self.stdscr.addstr(self.log_box.position.y, self.log_box.position.x + 1, 'Scan completed! Press any key to exit. View scan results in "scan-results-" CSV file saved in doc root')
+
+        # Restore the original color attribute
+        self.stdscr.attrset(old_attr)
 
         # Turn off the green color attribute
         self.stdscr.attroff(curses.color_pair(2))
