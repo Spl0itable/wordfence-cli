@@ -300,7 +300,8 @@ class LogBox(Box):
 
         # Write the "Possible malicious files found:" message in cyan color
         message = "Possible malicious file(s) found:"
-        self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
+        self.window.attron(curses.color_pair(CYAN_TEXT))
+        self.window.attron(curses.A_BOLD)
         self.window.addstr(line_number, offset, message)
         self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
         line_number += 1
@@ -314,16 +315,16 @@ class LogBox(Box):
                 file_path, log_message = line.split(' "', 1)
                 # Check if the file path starts with "/www/"
                 if file_path.startswith('/www/'):
-                    # Write the file path without using any color
+                    # Enable the color pair and bold attribute for the file path (yellow)
+                    self.window.attron(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
                     self.window.addstr(line_number, offset, file_path)
+                    self.window.attroff(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
                     # Write the delimiter with default text color
                     self.window.addstr(' "', curses.color_pair(0))
-                    # Enable the color pair and bold attribute for the log message (yellow)
-                    self.window.attron(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
+                    # Write the log message
                     self.window.addstr(log_message)
-                    self.window.attroff(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
                 else:
-                    # Write the whole line as is (without using any color)
+                    # Write the whole line as is (without using cyan color)
                     self.window.addstr(line_number, offset, line)
             except ValueError:
                 # Delimiter not found, write the line as is
