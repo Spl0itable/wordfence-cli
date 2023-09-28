@@ -238,20 +238,18 @@ DEFAULT_MAX_MESSAGES = 512
 
 
 class LogBox(Box):
-
     def __init__(
-                self,
-                columns: int,
-                lines: int,
-                max_messages: int = 0,
-                parent: Optional[curses.window] = None
-            ):
+        self,
+        columns: int,
+        lines: int,
+        max_messages: int = 0,
+        parent: Optional[curses.window] = None
+    ):
         self.columns = columns
         self.lines = lines
-        self.messages = deque(
-                maxlen=self._determine_max_messages(max_messages)
-            )
+        self.messages = deque(maxlen=self._determine_max_messages(max_messages))
         self.cursor_position = None
+        self.cyan_color_pair = 0  # Store the color pair for cyan
         super().__init__(parent, border=True)
 
     def _determine_max_messages(self, max_messages: int = 0) -> Optional[int]:
@@ -278,8 +276,8 @@ class LogBox(Box):
             while len(message):
                 if remaining_lines == 0:
                     break
-                line = message[:self.columns]
-                message = message[self.columns:]
+                line = message[: self.columns]
+                message = message[self.columns :]
                 message_lines.append(line)
                 remaining_lines -= 1
             for line in reversed(message_lines):
@@ -292,20 +290,11 @@ class LogBox(Box):
         last_line_number = line_number
         last_line_length = 0
 
-        # Define color pairs for cyan and yellow
-        CYAN_TEXT = 3
-        YELLOW_TEXT = 4
-        curses.init_pair(CYAN_TEXT, curses.COLOR_CYAN, curses.COLOR_BLACK)
-        curses.init_pair(YELLOW_TEXT, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-
-        # Save the current color pair and attribute
-        saved_color_pair = curses.color_pair(0)
-        saved_attribute = curses.A_NORMAL
+        # Enable the color pair for cyan
+        self.window.attron(self.cyan_color_pair)
 
         # Add the first line as "Possible malicious files found:" in cyan color
-        self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
         self.window.addstr(line_number, offset, "Possible malicious files found:")
-        self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
         line_number += 1
 
         for line in self._map_messages_to_lines(offset):
@@ -317,10 +306,10 @@ class LogBox(Box):
                 file_path, log_message = line.split(' "', 1)
                 # Check if the file path starts with "/www/"
                 if file_path.startswith('/www/'):
-                    # Enable the color pair and bold attribute for the file path (yellow)
-                    self.window.attron(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
+                    # Enable the color pair for yellow
+                    self.window.attron(curses.color_pair(YELLOW_TEXT))
                     self.window.addstr(line_number, offset, file_path)
-                    self.window.attroff(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
+                    self.window.attroff(curses.color_pair(YELLOW_TEXT))
                     # Write the delimiter with default text color
                     self.window.addstr(' "')
                     # Write the log message
@@ -333,8 +322,8 @@ class LogBox(Box):
                 self.window.addstr(line_number, offset, line)
             line_number += 1
 
-        # Restore the saved color pair and attribute
-        self.window.attron(saved_color_pair | saved_attribute)
+        # Disable the color pair for cyan
+        self.window.attroff(self.cyan_color_pair)
 
         self.cursor_offset = Position(last_line_number, last_line_length)
 
@@ -342,25 +331,12 @@ class LogBox(Box):
         self.messages.append(filter_control_characters(message))
         self.update()
 
-    def get_cursor_position(self) -> Position:
-        y = 0
-        x = 0
-        if self.position is not None:
-            y += self.position.y
-            x += self.position.x
-        if self.cursor_offset is not None:
-            y += self.cursor_offset.y
-            x += self.cursor_offset.x
-        return Position(y, x)
-
     def resize_for_layout(self, properties: LayoutProperties) -> bool:
         self.columns = properties.max_row_width - 2
         self.lines = properties.lines - properties.current_line - 2
         self.cursor_position = None
         if self.lines < 3:
-            raise ProgressException(
-                    'Insufficient space available to display log messages'
-                )
+            raise ProgressException('Insufficient space available to display log messages')
         return True
 
 
