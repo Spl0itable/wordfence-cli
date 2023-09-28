@@ -314,16 +314,16 @@ class LogBox(Box):
                 file_path, log_message = line.split(' "', 1)
                 # Check if the file path starts with "/www/"
                 if file_path.startswith('/www/'):
-                    # Enable the color pair and bold attribute for the file path (yellow)
-                    self.window.attron(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
+                    # Write the file path without using any color
                     self.window.addstr(line_number, offset, file_path)
-                    self.window.attroff(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
                     # Write the delimiter with default text color
                     self.window.addstr(' "', curses.color_pair(0))
-                    # Write the log message
+                    # Enable the color pair and bold attribute for the log message (yellow)
+                    self.window.attron(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
                     self.window.addstr(log_message)
+                    self.window.attroff(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
                 else:
-                    # Write the whole line as is (without using cyan color)
+                    # Write the whole line as is (without using any color)
                     self.window.addstr(line_number, offset, line)
             except ValueError:
                 # Delimiter not found, write the line as is
