@@ -86,6 +86,8 @@ def filter_images(path: str) -> bool:
 def filter_filename(value: str) -> Callable[[str], bool]:
     def filter(path: str) -> bool:
         filename = os.path.basename(path)
+        if filename == value:
+            filename = f"\033[91m{filename}\033[0m"  # Add red color ANSI escape codes
         return filename == value
     return filter
 

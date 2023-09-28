@@ -2,7 +2,6 @@ import curses
 import logging
 import signal
 import os
-import re
 from typing import List, Optional, Deque
 from logging import Handler
 from collections import deque, namedtuple
@@ -330,23 +329,14 @@ class LogBox(Box):
 
 
 class LogBoxHandler(Handler):
-    FILENAME_REGEX = r"(?<=\s)([^\s/]+\.[a-zA-Z]{2,4})(?=\s)"
 
     def __init__(self, log_box: LogBox):
         self.log_box = log_box
-        self.filename_regex = re.compile(self.FILENAME_REGEX)
         Handler.__init__(self)
 
     def emit(self, record):
-        message = record.getMessage()
-        highlighted_message = self.highlight_filenames(message)
-        self.log_box.add_message(highlighted_message)
-
-    def highlight_filenames(self, message):
-        return self.filename_regex.sub(
-            r"\033[91m\1\033[0m",
-            message
-        )
+        self.log_box.add_message(record.getMessage())
+        pass
 
 
 class LogBoxStream():
