@@ -328,6 +328,10 @@ class LogBox(Box):
                 # Delimiter not found, write the line as is
                 self.window.addstr(line_number, offset, line)
             line_number += 1
+
+        # Disable the cyan color
+        self.window.attron(curses.color_pair(0) | curses.A_NORMAL)
+
         self.cursor_offset = Position(last_line_number, last_line_length)
 
     def add_message(self, message: str) -> None:
