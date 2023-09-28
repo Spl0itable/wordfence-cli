@@ -20,6 +20,15 @@ class ProgressException(Exception):
 
 _displays = []
 
+METRIC_BOX_WIDTH = 39
+"""
+Hard-coded width of metric boxes
+
+The actual width taken up will be the hard-coded value +2 to account for the
+left and right borders. Each box on the same row will be separated by the
+padding value as well.
+"""
+
 
 def reset_terminal() -> None:
     for display in _displays:
@@ -40,11 +49,11 @@ Position = namedtuple('Position', ['y', 'x'])
 class LayoutProperties:
 
     def __init__(
-            self,
-            lines: int,
-            current_line: int,
-            max_row_width: int
-    ):
+                self,
+                lines: int,
+                current_line: int,
+                max_row_width: int
+            ):
         self.lines = lines
         self.current_line = current_line
         self.max_row_width = max_row_width
@@ -53,11 +62,11 @@ class LayoutProperties:
 class Box:
 
     def __init__(
-            self,
-            parent: Optional[curses.window] = None,
-            border: bool = True,
-            title: Optional[str] = None
-    ):
+                self,
+                parent: Optional[curses.window] = None,
+                border: bool = True,
+                title: Optional[str] = None
+            ):
         self.parent = parent
         self.border = border
         self.title = title
@@ -86,12 +95,12 @@ class Box:
             except Exception as e:
                 size = os.get_terminal_size()
                 raise ValueError(
-                    f"error moving window: y: {y}, x: {x}; "
-                    f"height: {self.get_height()}; "
-                    f"width: {self.get_width()}; "
-                    f"lines: {size.lines}; "
-                    f"columns: {size.columns}"
-                ) from e
+                        f"error moving window: y: {y}, x: {x}; "
+                        f"height: {self.get_height()}; "
+                        f"width: {self.get_width()}; "
+                        f"lines: {size.lines}; "
+                        f"columns: {size.columns}"
+                    ) from e
             self.resize()
 
     def _require_window(self) -> None:
@@ -108,10 +117,10 @@ class Box:
         return self.last_size
 
     def resize(
-            self,
-            lines: Optional[int] = None,
-            cols: Optional[int] = None
-    ) -> None:
+                self,
+                lines: Optional[int] = None,
+                cols: Optional[int] = None
+            ) -> None:
         if self.window is None:
             return
         height, width = self.compute_size()
@@ -173,16 +182,16 @@ class Metric:
 class MetricBox(Box):
 
     def __init__(
-            self,
-            metrics: List[Metric],
-            title: Optional[str] = None,
-            parent: Optional[curses.window] = None
-    ):
+                self,
+                metrics: List[Metric],
+                title: Optional[str] = None,
+                parent: Optional[curses.window] = None
+            ):
         self.metrics = metrics
         super().__init__(parent, title=title)
 
     def get_width(self) -> int:
-        return 39
+        return METRIC_BOX_WIDTH
 
     def get_height(self) -> int:
         return len(self.metrics)
@@ -200,7 +209,7 @@ class MetricBox(Box):
 class BannerBox(Box):
 
     def colorize(self, string):
-        return f"{self.color}{string}{curses.color_pair(0)}"
+       return f"{self.color}{string}{curses.color_pair(0)}"
 
     def __init__(self, banner, color=None, parent=None):
         self.banner = banner
@@ -214,8 +223,8 @@ class BannerBox(Box):
         return self.banner.row_count
 
     def draw_content(self):
-        offset = self.get_border_offset()
-        for index, row in enumerate(self.banner.rows):
+       offset = self.get_border_offset()
+       for index, row in enumerate(self.banner.rows):
             self.window.addstr(index + offset, offset, self.colorize(row))
 
     def colorize(self, string):
@@ -231,17 +240,17 @@ DEFAULT_MAX_MESSAGES = 512
 class LogBox(Box):
 
     def __init__(
-            self,
-            columns: int,
-            lines: int,
-            max_messages: int = 0,
-            parent: Optional[curses.window] = None
-    ):
+                self,
+                columns: int,
+                lines: int,
+                max_messages: int = 0,
+                parent: Optional[curses.window] = None
+            ):
         self.columns = columns
         self.lines = lines
         self.messages = deque(
-            maxlen=self._determine_max_messages(max_messages)
-        )
+                maxlen=self._determine_max_messages(max_messages)
+            )
         self.cursor_position = None
         super().__init__(parent, border=True)
 
@@ -460,13 +469,6 @@ class ProgressDisplay:
     METRICS_COUNT = 5
     MIN_MESSAGE_BOX_HEIGHT = 4
 
-    def __init__(self, worker_count: int):
-        _displays.append(self)
-        self.worker_count = worker_count
-        self.results_message = None
-        self.pending_resize = False
-        self._setup_curses()
-
     def _setup_curses(self) -> None:
         self.stdscr = curses.initscr()
         curses.noecho()
@@ -533,49 +535,6 @@ class ProgressDisplay:
             return int(value / elapsed_time)
         return 0
 
-    def _get_metrics(
-                self,
-                update: ScanProgressUpdate,
-                worker_index: Optional[int] = None
-            ) -> List[Metric]:
-        file_count = update.metrics.get_int_metric('counts', worker_index)
-        byte_count = update.metrics.get_int_metric('bytes', worker_index)
-        match_count = update.metrics.get_int_metric('matches', worker_index)
-        file_rate = self._compute_rate(file_count, update.elapsed_time)
-        byte_rate = self._compute_rate(byte_count, update.elapsed_time)
-        metrics = [
-                Metric('Files Processed', file_count),
-                Metric('Bytes Processed', byte_count),
-                Metric('Matches Found', match_count),
-                Metric('Files / Second', file_rate),
-                Metric('Bytes / Second', byte_rate)
-            ]
-        if len(metrics) > self.METRICS_COUNT:
-            raise ValueError("Metrics count is out of sync")
-        return metrics
-
-    def _initialize_metric_boxes(self) -> List[MetricBox]:
-        default_metrics = ScanMetrics(self.worker_count)
-        default_update = ScanProgressUpdate(
-                elapsed_time=0,
-                metrics=default_metrics
-            )
-        boxes = []
-        for index in range(0, self.worker_count + 1):
-            if index == 0:
-                worker_index = None
-                title = 'Summary'
-            else:
-                worker_index = index - 1
-                title = f'Worker {index}'
-            box = MetricBox(
-                    self._get_metrics(default_update, worker_index),
-                    title=title,
-                    parent=self.stdscr
-                )
-            boxes.append(box)
-        return boxes
-
     def _initialize_log_box(self) -> LogBox:
         log_box = LogBox(
                     # Lines and columns are dynamic
@@ -598,13 +557,6 @@ class ProgressDisplay:
         layout.position()
         layout.update_content()
         return layout
-
-    def _display_metrics(self, update: ScanProgressUpdate) -> None:
-        for index in range(0, self.worker_count + 1):
-            box = self.metric_boxes[index]
-            worker_index = None if index == 0 else index - 1
-            box.metrics = self._get_metrics(update, worker_index)
-            box.update()
 
     def handle_update(self, update: ScanProgressUpdate) -> None:
         self._resize_if_necessary()
