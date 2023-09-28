@@ -298,10 +298,13 @@ class LogBox(Box):
         curses.init_pair(CYAN_TEXT, curses.COLOR_CYAN, curses.COLOR_BLACK)
         curses.init_pair(YELLOW_TEXT, curses.COLOR_YELLOW, curses.COLOR_BLACK)
 
-        # Write the "Possible malicious files found:" message in cyan color
-        message = "Possible malicious files found:"
+        # Save the current color pair and attribute
+        saved_color_pair = self.window.attroff(curses.color_pair(CYAN_TEXT))
+        saved_attribute = self.window.attroff(curses.A_BOLD)
+
+        # Add the first line as "Possible malicious files found:" in cyan color
         self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
-        self.window.addstr(line_number, offset, message)
+        self.window.addstr(line_number, offset, "Possible malicious files found:")
         self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
         line_number += 1
 
@@ -312,7 +315,6 @@ class LogBox(Box):
             try:
                 # Split the line into the file path and the log message
                 file_path, log_message = line.split(' "', 1)
-                # Check if the file path starts with "/www/"
                 if file_path.startswith('/www/'):
                     # Enable the color pair and bold attribute for the file path (yellow)
                     self.window.attron(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
@@ -329,6 +331,9 @@ class LogBox(Box):
                 # Delimiter not found, write the line as is
                 self.window.addstr(line_number, offset, line)
             line_number += 1
+
+        # Restore the saved color pair and attribute
+        self.window.attron(saved_color_pair | saved_attribute)
 
         self.cursor_offset = Position(last_line_number, last_line_length)
 
