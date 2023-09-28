@@ -650,7 +650,7 @@ class ProgressDisplay:
                 ) from e
 
     def get_log_handler(self) -> logging.Handler:
-        return LogBoxHandler(self.log_box)
+        return LogBoxHandler(self.log_box, self.stdscr)
 
     def get_output_stream(self) -> LogBoxStream:
         return LogBoxStream(self.log_box)
