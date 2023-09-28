@@ -13,11 +13,6 @@ from ..banner.banner import get_welcome_banner
 from ...util import timing
 from ...util.unicode import filter_control_characters
 
-# Create the standard screen window
-stdscr = curses.initscr()
-
-# Create an instance of ProgressDisplay with the stdscr argument
-progress_display = ProgressDisplay(worker_count, stdscr)
 
 class ProgressException(Exception):
     pass
@@ -334,49 +329,23 @@ class LogBox(Box):
 
 
 class LogBoxHandler(Handler):
-    def __init__(self, log_box: LogBox, stdscr: curses.window):
-        super().__init__()
+
+    def __init__(self, log_box: LogBox):
         self.log_box = log_box
-        self.stdscr = stdscr
+        Handler.__init__(self)
 
     def emit(self, record):
-        message = self.format(record)
-        if 'filename' in message:
-            # Enable the red color attribute
-            self.log_box.window.attron(curses.color_pair(curses.COLOR_RED))
-
-            # Print the message with the red-colored filename
-            self.log_box.add_message(message.replace('filename', ''), color=curses.COLOR_RED)
-
-            # Disable the red color attribute
-            self.log_box.window.attroff(curses.color_pair(curses.COLOR_RED))
-        else:
-            self.log_box.add_message(message)
-
-    def flush(self):
+        self.log_box.add_message(record.getMessage())
         pass
 
 
-class LogBoxStream:
-    def __init__(self, log_box: LogBox, stdscr: curses.window):
+class LogBoxStream():
+
+    def __init__(self, log_box: LogBox):
         self.log_box = log_box
-        self.stdscr = stdscr
 
     def write(self, line):
-        if 'filename' in line:
-            # Enable the red color attribute
-            self.log_box.window.attron(curses.color_pair(curses.COLOR_RED))
-
-            # Print the line with the red-colored filename
-            self.log_box.add_message(line.replace('filename', ''), color=curses.COLOR_RED)
-
-            # Disable the red color attribute
-            self.log_box.window.attroff(curses.color_pair(curses.COLOR_RED))
-        else:
-            self.log_box.add_message(line)
-
-    def flush(self):
-        pass
+        self.log_box.add_message(line)
 
 
 class BoxLayout:
@@ -481,12 +450,11 @@ class ProgressDisplay:
     METRICS_COUNT = 5
     MIN_MESSAGE_BOX_HEIGHT = 4
 
-    def __init__(self, worker_count: int, stdscr: curses.window):
+    def __init__(self, worker_count: int):
         _displays.append(self)
         self.worker_count = worker_count
         self.results_message = None
         self.pending_resize = False
-        self.stdscr = stdscr
         self._setup_curses()
 
     def _setup_curses(self) -> None:
