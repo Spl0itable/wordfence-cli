@@ -697,3 +697,6 @@ class ProgressDisplay:
 
         # Disable the color pair for the success message
         self.stdscr.attroff(curses.color_pair(GREEN_TEXT))
+
+        # Disable the color pair for the file path
+        self.stdscr.attroff(curses.color_pair(YELLOW_TEXT))
