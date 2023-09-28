@@ -669,7 +669,7 @@ class ProgressDisplay:
 
         # Print the success message in green at the bottom of the log box
         success_y = self.log_box.position.y + self.log_box.get_height() - 1
-        self.log_box.window.addstr(success_y, self.log_box.position.x + 1, success_message)
+        self.log_box.window.addstr(success_y, self.log_box.position.x + 1, success_message, curses.color_pair(GREEN_TEXT))
 
         # Disable the color pair
         self.log_box.window.attroff(curses.color_pair(GREEN_TEXT))
