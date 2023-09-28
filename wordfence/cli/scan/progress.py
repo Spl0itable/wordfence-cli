@@ -667,7 +667,7 @@ class ProgressDisplay:
         # Enable the color pair
         self.log_box.window.attron(curses.color_pair(GREEN_TEXT))
 
-        # Print the success message in green at the end of the log
+        # Print the success message in green at the end of the log box
         self.log_box.add_message(success_message)
         self.log_box.update()
 
