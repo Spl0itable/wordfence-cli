@@ -292,11 +292,17 @@ class LogBox(Box):
         last_line_number = line_number
         last_line_length = 0
 
-        # Define color pair for cyan
+        # Define color pairs for cyan and yellow
         CYAN_TEXT = 3
+        YELLOW_TEXT = 4
         curses.init_pair(CYAN_TEXT, curses.COLOR_CYAN, curses.COLOR_BLACK)
+        curses.init_pair(YELLOW_TEXT, curses.COLOR_YELLOW, curses.COLOR_BLACK)
 
-        # Enable the color pair and bold attribute for the first line (cyan)
+        # Save the current color pair and attribute
+        saved_color_pair = self.window.attroff(curses.color_pair(CYAN_TEXT))
+        saved_attribute = self.window.attroff(curses.A_BOLD)
+
+        # Add the first line as "Possible malicious files found:" in cyan color
         self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
         self.window.addstr(line_number, offset, "Possible malicious files found:")
         self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
@@ -310,10 +316,6 @@ class LogBox(Box):
                 # Split the line into the file path and the log message
                 file_path, log_message = line.split(' "', 1)
                 if file_path.startswith('/www/'):
-                    # Define color pair for yellow
-                    YELLOW_TEXT = 4
-                    curses.init_pair(YELLOW_TEXT, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-
                     # Enable the color pair and bold attribute for the file path (yellow)
                     self.window.attron(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
                     self.window.addstr(line_number, offset, file_path)
@@ -330,7 +332,10 @@ class LogBox(Box):
                 self.window.addstr(line_number, offset, line)
             line_number += 1
 
-        self.window.attron(curses.color_pair(0) | curses.A_NORMAL)
+        # Restore the saved color pair and attribute
+        self.window.attron(saved_color_pair | saved_attribute)
+
+        self.cursor_offset = Position(last_line_number, last_line_length)
 
     def add_message(self, message: str) -> None:
         self.messages.append(filter_control_characters(message))
