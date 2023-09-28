@@ -346,7 +346,7 @@ class LogBoxHandler(Handler):
         return self.filename_regex.sub(self.colorize_filename, message)
 
     def colorize_filename(self, match):
-        return f"\033[91m{match.group(1)}\033[0m"  # Add red color ANSI escape codes
+        return curses.color_pair(1) + match.group(1) + curses.color_pair(0)
 
 
 class LogBoxStream():
@@ -362,7 +362,7 @@ class LogBoxStream():
 
     def highlight_filenames(self, line):
         return self.filename_regex.sub(
-            r"\033[91m\1\033[0m",
+            lambda match: curses.color_pair(1) + match.group(1) + curses.color_pair(0),
             line
         )
 
