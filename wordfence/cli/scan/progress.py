@@ -330,6 +330,9 @@ class LogBox(Box):
                 self.window.addstr(line_number, offset, line)
             line_number += 1
 
+        # Disable the cyan color for the "Possible malicious files found:" message
+        self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
+
         self.cursor_offset = Position(last_line_number, last_line_length)
 
     def add_message(self, message: str) -> None:
