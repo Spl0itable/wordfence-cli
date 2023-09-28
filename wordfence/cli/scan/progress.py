@@ -563,6 +563,27 @@ class ProgressDisplay:
             raise ValueError("Metrics count is out of sync")
         return metrics
 
+    def _initialize_metric_boxes(self) -> None:
+        default_metrics = ScanMetrics(self.worker_count)
+        default_update = ScanProgressUpdate(
+                elapsed_time=0,
+                metrics=default_metrics
+            )
+        boxes = []
+        for index in range(0, self.worker_count + 1):
+            if index == 0:
+                worker_index = None
+                title = 'Summary'
+            else:
+                worker_index = index - 1
+                title = f'Worker {index}'
+            box = MetricBox(
+                    self._get_metrics(default_update, worker_index),
+                    title=title,
+                    parent=self.stdscr
+                )
+            boxes.append(box)
+
     def _initialize_log_box(self) -> LogBox:
         log_box = LogBox(
                     # Lines and columns are dynamic
