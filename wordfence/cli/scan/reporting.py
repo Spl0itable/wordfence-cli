@@ -53,7 +53,7 @@ class CsvReportWriter(ReportWriter):
         self.writer = csv.writer(self._target, delimiter=self.get_delimiter())
 
     def get_delimiter(self) -> str:
-        return ','
+        return ' - '
 
     def write_row(self, data: List[str]) -> None:
         self.writer.writerow(data)
