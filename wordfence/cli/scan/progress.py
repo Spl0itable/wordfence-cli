@@ -332,8 +332,8 @@ class LogBox(Box):
 
         self.window.attron(curses.color_pair(0) | curses.A_NORMAL)
 
-        def add_message(self, message: str) -> None:
-            self.messages.append(filter_control_characters(message))
+    def add_message(self, message: str) -> None:
+        self.messages.append(filter_control_characters(message))
         self.update()
 
     def get_cursor_position(self) -> Position:
