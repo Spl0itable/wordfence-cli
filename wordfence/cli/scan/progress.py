@@ -296,10 +296,14 @@ class LogBox(Box):
             last_line_length = len(line)
             line = line.ljust(self.columns)
             try:
-                # Check if the line contains "/www/"
-                if '/www/' in line:
-                    # Write the line with red text color
-                    self.window.addstr(line_number, offset, line, curses.color_pair(curses.COLOR_RED))
+                # Split the line into the file path and the log message
+                file_path, log_message = line.split(' "', 1)
+                # Check if the file path starts with "/www/"
+                if file_path.startswith('/www/'):
+                    # Write the file path with red text color
+                    self.window.addstr(line_number, offset, file_path, curses.color_pair(curses.COLOR_RED))
+                    # Write the log message
+                    self.window.addstr(log_message)
                 else:
                     # Write the line as is
                     self.window.addstr(line_number, offset, line)
