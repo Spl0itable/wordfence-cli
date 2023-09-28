@@ -291,19 +291,13 @@ class LogBox(Box):
         line_number = offset
         last_line_number = line_number
         last_line_length = 0
+        has_file_paths = False  # Flag to track if there are lines with file paths
 
         # Define color pairs for cyan and yellow
         CYAN_TEXT = 3
         YELLOW_TEXT = 4
         curses.init_pair(CYAN_TEXT, curses.COLOR_CYAN, curses.COLOR_BLACK)
         curses.init_pair(YELLOW_TEXT, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-
-        # Write the "Possible malicious files found:" message in cyan color
-        message = "Possible malicious file(s) found:"
-        self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
-        self.window.addstr(line_number, offset, message)
-        self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
-        line_number += 1
 
         for line in self._map_messages_to_lines(offset):
             last_line_number = line_number
@@ -314,6 +308,7 @@ class LogBox(Box):
                 file_path, log_message = line.split(' "', 1)
                 # Check if the file path starts with "/www/"
                 if file_path.startswith('/www/'):
+                    has_file_paths = True  # Set the flag to True if there's at least one file path
                     # Enable the color pair and bold attribute for the file path (yellow)
                     self.window.attron(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
                     self.window.addstr(line_number, offset, file_path)
@@ -328,6 +323,14 @@ class LogBox(Box):
             except ValueError:
                 # Delimiter not found, write the line as is
                 self.window.addstr(line_number, offset, line)
+            line_number += 1
+
+        if has_file_paths:
+            # Write the "Possible malicious file(s) found:" message in cyan color
+            message = "Possible malicious file(s) found:"
+            self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
+            self.window.addstr(offset, offset, message)
+            self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
             line_number += 1
 
         self.cursor_offset = Position(last_line_number, last_line_length)
