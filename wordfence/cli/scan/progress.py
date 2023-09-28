@@ -291,6 +291,7 @@ class LogBox(Box):
         line_number = offset + 1  # Offset the line number by 1
         last_line_number = line_number
         last_line_length = 0
+        has_file_paths = False  # Flag to track if there are lines with file paths
         possible_malicious_files = []  # List to store possible malicious file lines
 
         # Define color pairs for cyan and yellow
@@ -308,7 +309,7 @@ class LogBox(Box):
                 file_path, log_message = line.split(' "', 1)
                 # Check if the file path starts with "/www/"
                 if file_path.startswith('/www/'):
-                    self.has_file_paths = True  # Set the flag to True if there's at least one file path
+                    has_file_paths = True  # Set the flag to True if there's at least one file path
                     # Enable the color pair and bold attribute for the file path (yellow)
                     self.window.attron(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
                     self.window.addstr(line_number, offset, file_path)
@@ -326,7 +327,7 @@ class LogBox(Box):
                 self.window.addstr(line_number, offset, line)
             line_number += 1
 
-        if self.has_file_paths:
+        if has_file_paths:
             # Write the "Possible malicious file(s) found:" message in cyan color
             message = "Possible malicious file(s) found:"
             self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
@@ -338,10 +339,7 @@ class LogBox(Box):
             self.window.move(line_number, offset)
             self.window.clrtoeol()
 
-        self.cursor_offset = Position(last_line_number, last_line_length)
-
-        # Check if the scan has completed and there are no file paths
-        if not self.has_file_paths and self.results_message == 'SUCCESS':
+        if not has_file_paths and self.results_message == 'SUCCESS':
             # Write the "No malware found :)" message in cyan color
             message = "No malware found :)"
             self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
@@ -352,6 +350,8 @@ class LogBox(Box):
             # Clear the line that contains the appended log message
             self.window.move(line_number, offset)
             self.window.clrtoeol()
+
+        self.window.move(line_number, offset)  # Move the cursor to the last line
 
         self.cursor_offset = Position(last_line_number, last_line_length)
 
