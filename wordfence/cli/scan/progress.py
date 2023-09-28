@@ -303,6 +303,8 @@ class LogBox(Box):
         self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
         self.window.addstr(line_number, offset, message)
         self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
+        # Write the delimiter with default text color
+        self.window.addstr(' "', curses.color_pair(0))
         line_number += 1
 
         for line in self._map_messages_to_lines(offset):
