@@ -303,19 +303,7 @@ class LogBox(Box):
         self.cursor_offset = Position(last_line_number, last_line_length)
 
     def add_message(self, message: str) -> None:
-        message = filter_control_characters(message)
-        if 'filename' in message:
-            # Enable the red color attribute
-            self.window.attron(curses.color_pair(curses.COLOR_RED))
-
-            # Print the message with the red-colored filename
-            self.window.addstr(message.replace('filename', ''), curses.color_pair(curses.COLOR_RED))
-
-            # Disable the red color attribute
-            self.window.attroff(curses.color_pair(curses.COLOR_RED))
-        else:
-            self.window.addstr(message)
-        self.window.addstr('\n')
+        self.messages.append(filter_control_characters(message))
         self.update()
 
     def get_cursor_position(self) -> Position:
@@ -353,11 +341,25 @@ class LogBoxHandler(Handler):
 
 class LogBoxStream():
 
-    def __init__(self, log_box: LogBox):
+    def __init__(self, log_box: LogBox, stdscr: curses.window):
         self.log_box = log_box
+        self.stdscr = stdscr
 
     def write(self, line):
-        self.log_box.add_message(line)
+        if 'filename' in line:
+            # Enable the red color attribute
+            self.stdscr.attron(curses.color_pair(curses.COLOR_RED))
+
+            # Print the line with the red-colored filename
+            self.stdscr.addstr(line.replace('filename', ''), curses.color_pair(curses.COLOR_RED))
+
+            # Disable the red color attribute
+            self.stdscr.attroff(curses.color_pair(curses.COLOR_RED))
+        else:
+            self.stdscr.addstr(line)
+        self.stdscr.addstr('\n')
+        self.stdscr.refresh()
+        self.log_box.update()
 
 
 class BoxLayout:
@@ -652,7 +654,7 @@ class ProgressDisplay:
         return LogBoxHandler(self.log_box)
 
     def get_output_stream(self) -> LogBoxStream:
-        return LogBoxStream(self.log_box)
+        return LogBoxStream(self.log_box, self.stdscr)
 
     def _move_cursor_to_log_end(self) -> None:
         cursor_position = self.log_box.get_cursor_position()
