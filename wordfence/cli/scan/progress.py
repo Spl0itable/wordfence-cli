@@ -302,9 +302,8 @@ class LogBox(Box):
             line_number += 1
         self.cursor_offset = Position(last_line_number, last_line_length)
 
-    def add_red_message(self, message: str) -> None:
-        red_message = f"\033[91m{message}\033[0m"  # Add ANSI escape code for red color
-        self.messages.append(filter_control_characters(red_message))
+    def add_message(self, message: str) -> None:
+        self.messages.append(filter_control_characters(message))
         self.update()
 
     def get_cursor_position(self) -> Position:
@@ -336,11 +335,7 @@ class LogBoxHandler(Handler):
         Handler.__init__(self)
 
     def emit(self, record):
-        message = record.getMessage()
-        if "/www/" in message:
-            self.log_box.add_red_message(message)
-        else:
-            self.log_box.add_message(message)
+        self.log_box.add_message(record.getMessage())
         pass
 
 
