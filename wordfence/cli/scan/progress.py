@@ -339,19 +339,20 @@ class LogBox(Box):
             self.window.move(line_number, offset)
             self.window.clrtoeol()
 
-        if not has_file_paths and self.results_message == 'SUCCESS':
-            # Write the "No malware found :)" message in cyan color
-            message = "No malware found :)"
-            self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
-            self.window.addstr(offset, offset, message)
-            self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
-            line_number += 1
+        if self.results_message == 'SUCCESS':
+            if not has_file_paths and not possible_malicious_files:
+                # Write the "No malware found :)" message in cyan color
+                message = "No malware found :)"
+                self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
+                self.window.addstr(offset, offset, message)
+                self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
+                line_number += 1
 
-            # Clear the line that contains the appended log message
-            self.window.move(line_number, offset)
-            self.window.clrtoeol()
+                # Clear the line that contains the appended log message
+                self.window.move(line_number, offset)
+                self.window.clrtoeol()
 
-        self.window.move(line_number, offset)  # Move the cursor to the last line
+        self.cursor_position = Position(last_line_number, last_line_length)
 
         self.cursor_offset = Position(last_line_number, last_line_length)
 
