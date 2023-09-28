@@ -329,23 +329,49 @@ class LogBox(Box):
 
 
 class LogBoxHandler(Handler):
-
-    def __init__(self, log_box: LogBox):
+    def __init__(self, log_box: LogBox, stdscr: curses.window):
+        super().__init__()
         self.log_box = log_box
-        Handler.__init__(self)
+        self.stdscr = stdscr
 
     def emit(self, record):
-        self.log_box.add_message(record.getMessage())
+        message = self.format(record)
+        if 'filename' in message:
+            # Enable the red color attribute
+            self.log_box.window.attron(curses.color_pair(curses.COLOR_RED))
+
+            # Print the message with the red-colored filename
+            self.log_box.add_message(message.replace('filename', ''), color=curses.COLOR_RED)
+
+            # Disable the red color attribute
+            self.log_box.window.attroff(curses.color_pair(curses.COLOR_RED))
+        else:
+            self.log_box.add_message(message)
+
+    def flush(self):
         pass
 
 
-class LogBoxStream():
-
-    def __init__(self, log_box: LogBox):
+class LogBoxStream:
+    def __init__(self, log_box: LogBox, stdscr: curses.window):
         self.log_box = log_box
+        self.stdscr = stdscr
 
     def write(self, line):
-        self.log_box.add_message(line)
+        if 'filename' in line:
+            # Enable the red color attribute
+            self.log_box.window.attron(curses.color_pair(curses.COLOR_RED))
+
+            # Print the line with the red-colored filename
+            self.log_box.add_message(line.replace('filename', ''), color=curses.COLOR_RED)
+
+            # Disable the red color attribute
+            self.log_box.window.attroff(curses.color_pair(curses.COLOR_RED))
+        else:
+            self.log_box.add_message(line)
+
+    def flush(self):
+        pass
 
 
 class BoxLayout:
