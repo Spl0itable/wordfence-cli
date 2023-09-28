@@ -679,16 +679,16 @@ class ProgressDisplay:
         self._move_cursor_to_log_end()
         curses.curs_set(1)
 
-        # Define color pair for the new color and bold text
-        NEW_COLOR = 3
-        curses.init_pair(NEW_COLOR, curses.COLOR_BLACK, curses.COLOR_YELLOW)
+        # Define color pair for green text on default background
+        GREEN_TEXT = 3
+        curses.init_pair(GREEN_TEXT, curses.COLOR_GREEN, curses.COLOR_BLACK)
 
-        # Enable the color pair and bold attribute for the file path
-        self.stdscr.attron(curses.color_pair(NEW_COLOR) | curses.A_BOLD)
+        # Enable the color pair
+        self.stdscr.attron(curses.color_pair(GREEN_TEXT))
 
         # Print the success message in green
         success_y = self.log_box.position.y + self.log_box.get_height() - 1
         self.stdscr.addstr(success_y, self.log_box.position.x + 1, success_message)
 
-        # Disable the color pair and bold attribute for the file path
-        self.stdscr.attroff(curses.color_pair(NEW_COLOR) | curses.A_BOLD)
+        # Disable the color pair
+        self.stdscr.attroff(curses.color_pair(GREEN_TEXT))
