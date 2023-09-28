@@ -172,6 +172,40 @@ class Box:
         return False
 
 
+class Metric:
+
+    def __init__(self, label: str, value):
+        self.label = label
+        self.value = str(value)
+
+
+class MetricBox(Box):
+
+    def __init__(
+                self,
+                metrics: List[Metric],
+                title: Optional[str] = None,
+                parent: Optional[curses.window] = None
+            ):
+        self.metrics = metrics
+        super().__init__(parent, title=title)
+
+    def get_width(self) -> int:
+        return METRIC_BOX_WIDTH
+
+    def get_height(self) -> int:
+        return len(self.metrics)
+
+    def draw_content(self) -> None:
+        offset = self.get_border_offset()
+        width = self.get_width()
+        for index, metric in enumerate(self.metrics):
+            line = index + offset
+            label = f'{metric.label}:'
+            value_string = metric.value.rjust(width - len(label))
+            self.window.addstr(line, offset, label + value_string)
+
+
 class BannerBox(Box):
 
     def colorize(self, string):
@@ -435,6 +469,13 @@ class ProgressDisplay:
     METRICS_COUNT = 5
     MIN_MESSAGE_BOX_HEIGHT = 4
 
+    def __init__(self, worker_count: int):
+        _displays.append(self)
+        self.worker_count = worker_count
+        self.results_message = None
+        self.pending_resize = False
+        self._setup_curses()
+
     def _setup_curses(self) -> None:
         self.stdscr = curses.initscr()
         curses.noecho()
@@ -446,6 +487,7 @@ class ProgressDisplay:
     def _initialize_content(self, size: os.terminal_size) -> None:
         self.clear()
         self.banner_box = self._initialize_banner()
+        self.metric_boxes = self._initialize_metric_boxes()
         self.log_box = self._initialize_log_box()
         self.layout = self._initialize_layout(size)
         self.refresh()
@@ -503,7 +545,11 @@ class ProgressDisplay:
     def _get_metrics(
                 self,
                 update: ScanProgressUpdate,
+                worker_index: Optional[int] = None
             ) -> List[Metric]:
+        file_count = update.metrics.get_int_metric('counts', worker_index)
+        byte_count = update.metrics.get_int_metric('bytes', worker_index)
+        match_count = update.metrics.get_int_metric('matches', worker_index)
         file_rate = self._compute_rate(file_count, update.elapsed_time)
         byte_rate = self._compute_rate(byte_count, update.elapsed_time)
         metrics = [
@@ -518,11 +564,25 @@ class ProgressDisplay:
         return metrics
 
     def _initialize_metric_boxes(self) -> List[MetricBox]:
+        default_metrics = ScanMetrics(self.worker_count)
         default_update = ScanProgressUpdate(
                 elapsed_time=0,
                 metrics=default_metrics
             )
         boxes = []
+        for index in range(0, self.worker_count + 1):
+            if index == 0:
+                worker_index = None
+                title = 'Summary'
+            else:
+                worker_index = index - 1
+                title = f'Worker {index}'
+            box = MetricBox(
+                    self._get_metrics(default_update, worker_index),
+                    title=title,
+                    parent=self.stdscr
+                )
+            boxes.append(box)
         return boxes
 
     def _initialize_log_box(self) -> LogBox:
@@ -547,6 +607,13 @@ class ProgressDisplay:
         layout.position()
         layout.update_content()
         return layout
+
+    def _display_metrics(self, update: ScanProgressUpdate) -> None:
+        for index in range(0, self.worker_count + 1):
+            box = self.metric_boxes[index]
+            worker_index = None if index == 0 else index - 1
+            box.metrics = self._get_metrics(update, worker_index)
+            box.update()
 
     def handle_update(self, update: ScanProgressUpdate) -> None:
         self._resize_if_necessary()
