@@ -20,15 +20,6 @@ class ProgressException(Exception):
 
 _displays = []
 
-METRIC_BOX_WIDTH = 39
-"""
-Hard-coded width of metric boxes
-
-The actual width taken up will be the hard-coded value +2 to account for the
-left and right borders. Each box on the same row will be separated by the
-padding value as well.
-"""
-
 
 def reset_terminal() -> None:
     for display in _displays:
@@ -49,11 +40,11 @@ Position = namedtuple('Position', ['y', 'x'])
 class LayoutProperties:
 
     def __init__(
-                self,
-                lines: int,
-                current_line: int,
-                max_row_width: int
-            ):
+            self,
+            lines: int,
+            current_line: int,
+            max_row_width: int
+    ):
         self.lines = lines
         self.current_line = current_line
         self.max_row_width = max_row_width
@@ -62,11 +53,11 @@ class LayoutProperties:
 class Box:
 
     def __init__(
-                self,
-                parent: Optional[curses.window] = None,
-                border: bool = True,
-                title: Optional[str] = None
-            ):
+            self,
+            parent: Optional[curses.window] = None,
+            border: bool = True,
+            title: Optional[str] = None
+    ):
         self.parent = parent
         self.border = border
         self.title = title
@@ -95,12 +86,12 @@ class Box:
             except Exception as e:
                 size = os.get_terminal_size()
                 raise ValueError(
-                        f"error moving window: y: {y}, x: {x}; "
-                        f"height: {self.get_height()}; "
-                        f"width: {self.get_width()}; "
-                        f"lines: {size.lines}; "
-                        f"columns: {size.columns}"
-                    ) from e
+                    f"error moving window: y: {y}, x: {x}; "
+                    f"height: {self.get_height()}; "
+                    f"width: {self.get_width()}; "
+                    f"lines: {size.lines}; "
+                    f"columns: {size.columns}"
+                ) from e
             self.resize()
 
     def _require_window(self) -> None:
@@ -117,10 +108,10 @@ class Box:
         return self.last_size
 
     def resize(
-                self,
-                lines: Optional[int] = None,
-                cols: Optional[int] = None
-            ) -> None:
+            self,
+            lines: Optional[int] = None,
+            cols: Optional[int] = None
+    ) -> None:
         if self.window is None:
             return
         height, width = self.compute_size()
@@ -182,16 +173,16 @@ class Metric:
 class MetricBox(Box):
 
     def __init__(
-                self,
-                metrics: List[Metric],
-                title: Optional[str] = None,
-                parent: Optional[curses.window] = None
-            ):
+            self,
+            metrics: List[Metric],
+            title: Optional[str] = None,
+            parent: Optional[curses.window] = None
+    ):
         self.metrics = metrics
         super().__init__(parent, title=title)
 
     def get_width(self) -> int:
-        return METRIC_BOX_WIDTH
+        return 39
 
     def get_height(self) -> int:
         return len(self.metrics)
@@ -209,7 +200,7 @@ class MetricBox(Box):
 class BannerBox(Box):
 
     def colorize(self, string):
-       return f"{self.color}{string}{curses.color_pair(0)}"
+        return f"{self.color}{string}{curses.color_pair(0)}"
 
     def __init__(self, banner, color=None, parent=None):
         self.banner = banner
@@ -223,8 +214,8 @@ class BannerBox(Box):
         return self.banner.row_count
 
     def draw_content(self):
-       offset = self.get_border_offset()
-       for index, row in enumerate(self.banner.rows):
+        offset = self.get_border_offset()
+        for index, row in enumerate(self.banner.rows):
             self.window.addstr(index + offset, offset, self.colorize(row))
 
     def colorize(self, string):
@@ -240,17 +231,17 @@ DEFAULT_MAX_MESSAGES = 512
 class LogBox(Box):
 
     def __init__(
-                self,
-                columns: int,
-                lines: int,
-                max_messages: int = 0,
-                parent: Optional[curses.window] = None
-            ):
+            self,
+            columns: int,
+            lines: int,
+            max_messages: int = 0,
+            parent: Optional[curses.window] = None
+    ):
         self.columns = columns
         self.lines = lines
         self.messages = deque(
-                maxlen=self._determine_max_messages(max_messages)
-            )
+            maxlen=self._determine_max_messages(max_messages)
+        )
         self.cursor_position = None
         super().__init__(parent, border=True)
 
