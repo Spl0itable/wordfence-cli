@@ -330,8 +330,7 @@ class LogBox(Box):
 
 
 class LogBoxHandler(Handler):
-    FILENAME_REGEX = r'(?<=\s)[a-zA-Z0-9_]+\.[a-zA-Z]{2,4}(?=\s)'
-    FILENAME_TAG = "[filename]"
+    FILENAME_REGEX = r"(?<=\s)([^\s/]+\.[a-zA-Z]{2,4})(?=\s)"
 
     def __init__(self, log_box: LogBox):
         self.log_box = log_box
@@ -344,11 +343,10 @@ class LogBoxHandler(Handler):
         self.log_box.add_message(highlighted_message)
 
     def highlight_filenames(self, message):
-        matches = self.filename_regex.findall(message)
-        for match in matches:
-            highlighted_match = f"{self.FILENAME_TAG}{match}{self.FILENAME_TAG}"
-            message = message.replace(match, highlighted_match)
-        return message
+        return self.filename_regex.sub(
+            r"\033[91m\1\033[0m",
+            message
+        )
 
 
 class LogBoxStream():
