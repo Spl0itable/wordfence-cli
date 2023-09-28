@@ -310,7 +310,7 @@ class LogBox(Box):
                     has_file_paths = True  # Set the flag to True if there's at least one file path
                     # Enable the color pair and bold attribute for the file path (yellow)
                     self.window.attron(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
-                    self.window.addstr(line_number, offset, file_path)
+                    self.window.addstr(line_number + 1, offset, file_path)  # Increase line_number by 1 to start on a new line
                     self.window.attroff(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
                     # Write the delimiter with default text color
                     self.window.addstr(' "', curses.color_pair(0))
