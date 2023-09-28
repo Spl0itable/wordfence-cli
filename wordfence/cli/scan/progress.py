@@ -333,6 +333,10 @@ class LogBox(Box):
             self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
             line_number += 1
 
+            # Clear the line that contains the appended log message
+            self.window.move(line_number, offset)
+            self.window.clrtoeol()
+
         self.cursor_offset = Position(last_line_number, last_line_length)
 
     def add_message(self, message: str) -> None:
