@@ -664,12 +664,14 @@ class ProgressDisplay:
         GREEN_TEXT = 3
         curses.init_pair(GREEN_TEXT, curses.COLOR_GREEN, curses.COLOR_BLACK)
 
+        # Move the cursor to the end of the log box
+        self._move_cursor_to_log_end()
+
         # Enable the color pair
         self.log_box.window.attron(curses.color_pair(GREEN_TEXT))
 
-        # Print the success message in green at the end of the log box
-        self.log_box.add_message(success_message)
-        self.log_box.update()
+        # Print the success message in green
+        self.log_box.window.addstr(success_message, curses.color_pair(GREEN_TEXT))
 
         # Disable the color pair
         self.log_box.window.attroff(curses.color_pair(GREEN_TEXT))
