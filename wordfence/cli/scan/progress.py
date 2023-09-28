@@ -667,8 +667,12 @@ class ProgressDisplay:
         # Enable the color pair
         self.stdscr.attron(curses.color_pair(GREEN_TEXT))
 
-        # Print the success message in green
-        self.stdscr.addstr(self.log_box.position.y + len(self.log_box.messages) - 1, self.log_box.position.x + 1, success_message)
+        # Get the position to print the success message
+        y, x = self.stdscr.getyx()
+        success_y = y + self.log_box.get_height() - 1
+
+        # Print the success message in green at the bottom
+        self.stdscr.addstr(success_y, self.log_box.position.x + 1, success_message)
 
         # Disable the color pair
         self.stdscr.attroff(curses.color_pair(GREEN_TEXT))
