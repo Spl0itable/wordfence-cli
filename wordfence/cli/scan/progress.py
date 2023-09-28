@@ -291,6 +291,15 @@ class LogBox(Box):
         line_number = offset
         last_line_number = line_number
         last_line_length = 0
+
+        # Add the first line as "Possible malicious files found:" in cyan color
+        CYAN_TEXT = 3
+        curses.init_pair(CYAN_TEXT, curses.COLOR_CYAN, curses.COLOR_BLACK)
+        self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
+        self.window.addstr(line_number, offset, "Possible malicious files found:")
+        self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
+        line_number += 1
+
         for line in self._map_messages_to_lines(offset):
             last_line_number = line_number
             last_line_length = len(line)
