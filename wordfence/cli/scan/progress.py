@@ -298,6 +298,13 @@ class LogBox(Box):
         curses.init_pair(CYAN_TEXT, curses.COLOR_CYAN, curses.COLOR_BLACK)
         curses.init_pair(YELLOW_TEXT, curses.COLOR_YELLOW, curses.COLOR_BLACK)
 
+        # Check if the scan is in progress and display the progress message with animated dots
+        if not self.scan_complete:
+            progress_message = "Scanning in progress" + self.dot_animation[self.dot_index]
+            self.window.addstr(line_number, offset, progress_message)
+            line_number += 1
+            self.dot_index = (self.dot_index + 1) % len(self.dot_animation)
+
         for line in self._map_messages_to_lines(offset):
             last_line_number = line_number
             last_line_length = len(line)
@@ -344,6 +351,13 @@ class LogBox(Box):
             self.window.attron(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)
             self.window.addstr(offset, offset, message)
             self.window.attroff(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)
+            line_number += 1
+
+        # Add animated dots after the progress message until the end of the line
+        if not self.scan_complete:
+            dots_remaining = self.columns - len(progress_message)
+            animated_dots = self.dot_animation[self.dot_index] * dots_remaining
+            self.window.addstr(line_number, offset + len(progress_message), animated_dots)
             line_number += 1
 
         self.cursor_offset = Position(last_line_number, last_line_length)
