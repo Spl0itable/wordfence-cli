@@ -507,7 +507,6 @@ class ProgressDisplay:
         self.results_message = None
         self.pending_resize = False
         self._setup_curses()
-        self.scan_in_progress = True
 
     def _setup_curses(self) -> None:
         self.stdscr = curses.initscr()
@@ -620,10 +619,11 @@ class ProgressDisplay:
 
     def _initialize_log_box(self) -> LogBox:
         log_box = LogBox(
-            columns=10,
-            lines=5,
-            parent=self.stdscr
-        )
+                    # Lines and columns are dynamic
+                    columns=10,
+                    lines=5,
+                    parent=self.stdscr
+                )
         return log_box
 
     def _initialize_layout(self, size: os.terminal_size) -> BoxLayout:
@@ -647,34 +647,65 @@ class ProgressDisplay:
             box.metrics = self._get_metrics(update, worker_index)
             box.update()
 
-    def _display_progress_message(self) -> None:
-        progress_message = "Scanning in progress"
-        dot_animation = ["   ", ".  ", ".. ", "..."]
-        dot_index = 0
-
-        while self.scan_in_progress:
-            self.log_box.add_message(progress_message + dot_animation[dot_index])
-            dot_index = (dot_index + 1) % len(dot_animation)
-            self.refresh()
-            sleep(0.5)  # Adjust the delay as needed
-
     def handle_update(self, update: ScanProgressUpdate) -> None:
         self._resize_if_necessary()
         try:
-            if self.scan_in_progress:
-                self._display_progress_message()
             self._display_metrics(update)
             self.refresh()
         except Exception as e:
             reset_terminal()
             raise ProgressException('Rendering progress update failed') from e
 
+    def queue_resize(self) -> None:
+        self.pending_resize = True
+
+    def resize(self) -> None:
+        size = os.get_terminal_size()
+        smaller = size.columns < self.terminal_size.columns
+        self.terminal_size = size
+        if smaller:
+            self.layout.resize(size.lines, size.columns)
+        curses.resizeterm(size.lines, size.columns)
+        self.stdscr.erase()
+        self.stdscr.refresh()
+        self.stdscr.resize(size.lines, size.columns)
+        if not smaller:
+            self.layout.resize(size.lines, size.columns)
+        self.layout.update_content()
+        self.refresh()
+
+    def _resize_if_necessary(self) -> bool:
+        if not self.pending_resize:
+            return False
+        try:
+            self.resize()
+            self.pending_resize = False
+            return True
+        except Exception as e:
+            reset_terminal()
+            raise ProgressException(
+                    'Failed to adjust progress output to new terminal size'
+                ) from e
+
+    def get_log_handler(self) -> logging.Handler:
+        return LogBoxHandler(self.log_box)
+
+    def get_output_stream(self) -> LogBoxStream:
+        return LogBoxStream(self.log_box)
+
+    def _move_cursor_to_log_end(self) -> None:
+        cursor_position = self.log_box.get_cursor_position()
+        if cursor_position is not None:
+            try:
+                self.stdscr.move(cursor_position.y, cursor_position.x + 1)
+            except Exception:
+                pass
+
     def scan_finished_handler(
         self, metrics: ScanMetrics, timer: timing.Timer
     ) -> None:
         messages = default_scan_finished_handler(metrics, timer)
         self.results_message = messages.results
-        self.scan_in_progress = False
         self._move_cursor_to_log_end()
         curses.curs_set(1)
 
