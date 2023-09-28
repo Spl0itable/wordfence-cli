@@ -300,14 +300,14 @@ class LogBox(Box):
                 file_path, log_message = line.split(' "', 1)
                 # Check if the file path starts with "/www/"
                 if file_path.startswith('/www/'):
-                    # Define color pair for the new color and bold text
-                    NEW_COLOR = 3
-                    curses.init_pair(NEW_COLOR, curses.COLOR_BLACK, curses.COLOR_YELLOW)
+                    # Define color pair for the file path
+                    YELLOW_TEXT = 2
+                    curses.init_pair(YELLOW_TEXT, curses.COLOR_YELLOW, curses.COLOR_BLACK)
 
-                    # Enable the color pair and bold attribute for the file path
-                    self.window.attron(curses.color_pair(NEW_COLOR) | curses.A_BOLD)
+                    # Enable the color pair for the file path
+                    self.window.attron(curses.color_pair(YELLOW_TEXT))
                     self.window.addstr(line_number, offset, file_path)
-                    self.window.attroff(curses.color_pair(NEW_COLOR) | curses.A_BOLD)
+                    self.window.attroff(curses.color_pair(YELLOW_TEXT))
                     # Write the delimiter with default text color
                     self.window.addstr(' "')
                     # Write the log message
