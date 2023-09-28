@@ -287,43 +287,43 @@ class LogBox(Box):
         return lines
 
     def draw_content(self) -> None:
-    offset = self.get_border_offset()
-    line_number = offset
-    last_line_number = line_number
-    last_line_length = 0
-    for line in self._map_messages_to_lines(offset):
+        offset = self.get_border_offset()
+        line_number = offset
         last_line_number = line_number
-        last_line_length = len(line)
-        line = line.ljust(self.columns)
-        try:
-            # Split the line into the file path and the log message
-            file_path, log_message = line.split(' "', 1)
-            # Check if the file path starts with "/www/"
-            if file_path.startswith('/www/'):
-                # Define color pair for red text on default background
-                RED_TEXT = 2
-                curses.init_pair(RED_TEXT, curses.COLOR_RED, curses.COLOR_BLACK)
+        last_line_length = 0
+        for line in self._map_messages_to_lines(offset):
+            last_line_number = line_number
+            last_line_length = len(line)
+            line = line.ljust(self.columns)
+            try:
+                # Split the line into the file path and the log message
+                file_path, log_message = line.split(' "', 1)
+                # Check if the file path starts with "/www/"
+                if file_path.startswith('/www/'):
+                    # Define color pair for red text on default background
+                    RED_TEXT = 2
+                    curses.init_pair(RED_TEXT, curses.COLOR_RED, curses.COLOR_BLACK)
 
-                # Enable the color pair
-                self.window.attron(curses.color_pair(RED_TEXT))
-                self.window.addstr(line_number, offset, file_path)
-                self.window.attroff(curses.color_pair(RED_TEXT))
-                # Write the delimiter with default text color
-                self.window.addstr(' "')
-                # Write the log message
-                self.window.addstr(log_message)
-            else:
-                # Write the line as is
+                    # Enable the color pair
+                    self.window.attron(curses.color_pair(RED_TEXT))
+                    self.window.addstr(line_number, offset, file_path)
+                    self.window.attroff(curses.color_pair(RED_TEXT))
+                    # Write the delimiter with default text color
+                    self.window.addstr(' "')
+                    # Write the log message
+                    self.window.addstr(log_message)
+                else:
+                    # Write the line as is
+                    self.window.addstr(line_number, offset, line)
+            except ValueError:
+                # Delimiter not found, write the line as is
                 self.window.addstr(line_number, offset, line)
-        except ValueError:
-            # Delimiter not found, write the line as is
-            self.window.addstr(line_number, offset, line)
-        line_number += 1
-    self.cursor_offset = Position(last_line_number, last_line_length)
+            line_number += 1
+        self.cursor_offset = Position(last_line_number, last_line_length)
 
-    def add_message(self, message: str) -> None:
-        self.messages.append(filter_control_characters(message))
-        self.update()
+        def add_message(self, message: str) -> None:
+            self.messages.append(filter_control_characters(message))
+            self.update()
 
     def get_cursor_position(self) -> Position:
         y = 0
