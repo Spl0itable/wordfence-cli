@@ -298,6 +298,10 @@ class LogBox(Box):
         curses.init_pair(CYAN_TEXT, curses.COLOR_CYAN, curses.COLOR_BLACK)
         curses.init_pair(YELLOW_TEXT, curses.COLOR_YELLOW, curses.COLOR_BLACK)
 
+        # Save the current color pair and attribute
+        saved_color_pair = curses.color_pair(0)
+        saved_attribute = curses.A_NORMAL
+
         # Add the first line as "Possible malicious files found:" in cyan color
         self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
         self.window.addstr(line_number, offset, "Possible malicious files found:")
@@ -329,8 +333,8 @@ class LogBox(Box):
                 self.window.addstr(line_number, offset, line)
             line_number += 1
 
-        # Disable the colors
-        self.window.attron(curses.color_pair(0) | curses.A_NORMAL)
+        # Restore the saved color pair and attribute
+        self.window.attron(saved_color_pair | saved_attribute)
 
         self.cursor_offset = Position(last_line_number, last_line_length)
 
