@@ -717,7 +717,7 @@ class ProgressDisplay:
 
         # Modify the success message based on whether file paths are present
         success_message = 'Scan completed! Press any key to exit.'
-        if not self.log_box.has_file_paths and self.log_box.scan_complete:
+        if self.log_box.has_file_paths:
             success_message += ' View scan results in "scan-results-" CSV file saved to doc root.'
 
         # Print the success message in green and bold
