@@ -329,14 +329,23 @@ class LogBox(Box):
 
 
 class LogBoxHandler(Handler):
+    FILENAME_REGEX = r"(?<=\s)([^\s/]+\.[a-zA-Z]{2,4})(?=\s)"
 
     def __init__(self, log_box: LogBox):
         self.log_box = log_box
+        self.filename_regex = re.compile(self.FILENAME_REGEX)
         Handler.__init__(self)
 
     def emit(self, record):
-        self.log_box.add_message(record.getMessage())
-        pass
+        message = record.getMessage()
+        highlighted_message = self.highlight_filenames(message)
+        self.log_box.add_message(highlighted_message)
+
+    def highlight_filenames(self, message):
+        return self.filename_regex.sub(self.colorize_filename, message)
+
+    def colorize_filename(self, match):
+        return f"\033[91m{match.group(1)}\033[0m"  # Add red color ANSI escape codes
 
 
 class LogBoxStream():
