@@ -331,6 +331,7 @@ class LogBox(Box):
 
 class LogBoxHandler(Handler):
     FILENAME_REGEX = r'(?<=\s)[a-zA-Z0-9_]+\.[a-zA-Z]{2,4}(?=\s)'
+    FILENAME_TAG = "[filename]"
 
     def __init__(self, log_box: LogBox):
         self.log_box = log_box
@@ -345,7 +346,7 @@ class LogBoxHandler(Handler):
     def highlight_filenames(self, message):
         matches = self.filename_regex.findall(message)
         for match in matches:
-            highlighted_match = f"\033[91m{match}\033[0m"  # Red color ANSI escape codes
+            highlighted_match = f"{self.FILENAME_TAG}{match}{self.FILENAME_TAG}"
             message = message.replace(match, highlighted_match)
         return message
 
