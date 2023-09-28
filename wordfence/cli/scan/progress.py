@@ -296,19 +296,13 @@ class LogBox(Box):
             last_line_length = len(line)
             line = line.ljust(self.columns)
             try:
-                # Split the line into columns
-                columns = line.split(', ')
-                # Iterate through the columns
-                for i, column in enumerate(columns):
-                    # Check if the column starts with "/www/"
-                    if column.startswith('/www/'):
-                        # Write the column with red text color
-                        self.window.addstr(line_number, offset, column, curses.color_pair(curses.COLOR_RED))
-                    else:
-                        # Write the column as is
-                        self.window.addstr(line_number, offset, column)
-                    # Add spacing for the next column
-                    offset += len(column) + 2
+                # Check if the line contains "/www/"
+                if '/www/' in line:
+                    # Write the line with red text color
+                    self.window.addstr(line_number, offset, line, curses.color_pair(curses.COLOR_RED))
+                else:
+                    # Write the line as is
+                    self.window.addstr(line_number, offset, line)
             except Exception:
                 break
             line_number += 1
