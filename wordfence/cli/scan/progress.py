@@ -291,7 +291,7 @@ class LogBox(Box):
         line_number = offset + 1  # Offset the line number by 1
         last_line_number = line_number
         last_line_length = 0
-        has_file_paths = False  # Flag to track if there are lines with file paths
+        possible_malicious_files = []  # List to store possible malicious file lines
 
         # Define color pairs for cyan and yellow
         CYAN_TEXT = 3
@@ -308,7 +308,7 @@ class LogBox(Box):
                 file_path, log_message = line.split(' "', 1)
                 # Check if the file path starts with "/www/"
                 if file_path.startswith('/www/'):
-                    has_file_paths = True  # Set the flag to True if there's at least one file path
+                    self.has_file_paths = True  # Set the flag to True if there's at least one file path
                     # Enable the color pair and bold attribute for the file path (yellow)
                     self.window.attron(curses.color_pair(YELLOW_TEXT) | curses.A_BOLD)
                     self.window.addstr(line_number, offset, file_path)
@@ -317,6 +317,7 @@ class LogBox(Box):
                     self.window.addstr(' "', curses.color_pair(0))
                     # Write the log message
                     self.window.addstr(log_message)
+                    possible_malicious_files.append(line)  # Add possible malicious file line to the list
                 else:
                     # Write the whole line as is (without using cyan color)
                     self.window.addstr(line_number, offset, line)
@@ -325,9 +326,24 @@ class LogBox(Box):
                 self.window.addstr(line_number, offset, line)
             line_number += 1
 
-        if has_file_paths:
+        if self.has_file_paths:
             # Write the "Possible malicious file(s) found:" message in cyan color
             message = "Possible malicious file(s) found:"
+            self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
+            self.window.addstr(offset, offset, message)
+            self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
+            line_number += 1
+
+            # Clear the line that contains the appended log message
+            self.window.move(line_number, offset)
+            self.window.clrtoeol()
+
+        self.cursor_offset = Position(last_line_number, last_line_length)
+
+        # Check if the scan has completed and there are no file paths
+        if not self.has_file_paths and self.results_message == 'SUCCESS':
+            # Write the "No malware found :)" message in cyan color
+            message = "No malware found :)"
             self.window.attron(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
             self.window.addstr(offset, offset, message)
             self.window.attroff(curses.color_pair(CYAN_TEXT) | curses.A_BOLD)
@@ -687,7 +703,10 @@ class ProgressDisplay:
             except Exception:
                 pass
 
-    def scan_finished_handler(self, metrics: ScanMetrics, timer: timing.Timer) -> None:
+    def scan_finished_handler(
+        self, metrics: ScanMetrics,
+        timer: timing.Timer
+    ) -> None:
         messages = default_scan_finished_handler(metrics, timer)
         self.results_message = messages.results
         success_message = 'Scan completed! Press any key to exit. View scan results in "scan-results-" CSV file saved to doc root.'
@@ -706,20 +725,3 @@ class ProgressDisplay:
 
         # Disable the color pair and bold attribute for the success message
         self.stdscr.attroff(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
-
-        # Check if there is a success message and no malware found
-        if self.results_message == 'SUCCESS' and not self.log_box.messages:
-            # Enable the color pair for the "No malware found :)" message
-            CYAN_TEXT = 4
-            BOLD_TEXT = curses.A_BOLD
-            curses.init_pair(CYAN_TEXT, curses.COLOR_CYAN, curses.COLOR_BLACK)
-            self.stdscr.attron(curses.color_pair(CYAN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
-
-            # Print the "No malware found :)" message in cyan and bold
-            no_malware_y = success_y + 1
-            self.stdscr.addstr(no_malware_y, self.log_box.position.x + 1, "No malware found :)")
-
-            # Disable the color pair and bold attribute for the "No malware found :)" message
-            self.stdscr.attroff(curses.color_pair(CYAN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
-
-        self.refresh()
