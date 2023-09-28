@@ -288,7 +288,7 @@ class LogBox(Box):
 
     def draw_content(self) -> None:
         offset = self.get_border_offset()
-        line_number = offset
+        line_number = offset + 1  # Offset the line number by 1
         last_line_number = line_number
         last_line_length = 0
         has_file_paths = False  # Flag to track if there are lines with file paths
