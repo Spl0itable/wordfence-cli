@@ -687,10 +687,7 @@ class ProgressDisplay:
             except Exception:
                 pass
 
-    def scan_finished_handler(
-        self, metrics: ScanMetrics,
-        timer: timing.Timer
-    ) -> None:
+    def scan_finished_handler(self, metrics: ScanMetrics, timer: timing.Timer) -> None:
         messages = default_scan_finished_handler(metrics, timer)
         self.results_message = messages.results
         success_message = 'Scan completed! Press any key to exit. View scan results in "scan-results-" CSV file saved to doc root.'
@@ -709,3 +706,20 @@ class ProgressDisplay:
 
         # Disable the color pair and bold attribute for the success message
         self.stdscr.attroff(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
+
+        # Check if there is a success message and no malware found
+        if self.results_message == 'SUCCESS' and not self.log_box.messages:
+            # Enable the color pair for the "No malware found :)" message
+            CYAN_TEXT = 4
+            BOLD_TEXT = curses.A_BOLD
+            curses.init_pair(CYAN_TEXT, curses.COLOR_CYAN, curses.COLOR_BLACK)
+            self.stdscr.attron(curses.color_pair(CYAN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
+
+            # Print the "No malware found :)" message in cyan and bold
+            no_malware_y = success_y + 1
+            self.stdscr.addstr(no_malware_y, self.log_box.position.x + 1, "No malware found :)")
+
+            # Disable the color pair and bold attribute for the "No malware found :)" message
+            self.stdscr.attroff(curses.color_pair(CYAN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
+
+        self.refresh()
