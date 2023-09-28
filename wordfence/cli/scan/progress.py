@@ -298,11 +298,17 @@ class LogBox(Box):
             try:
                 # Split the line into columns
                 columns = line.split(', ')
-                # Write the first column with red text color
-                self.window.addstr(line_number, offset, columns[0], curses.color_pair(curses.COLOR_RED))
-                # Write the remaining columns
-                for i in range(1, len(columns)):
-                    self.window.addstr(line_number, offset + len(columns[i-1]) + 2, columns[i])
+                # Iterate through the columns
+                for i, column in enumerate(columns):
+                    # Check if the column starts with "/www/"
+                    if column.startswith('/www/'):
+                        # Write the column with red text color
+                        self.window.addstr(line_number, offset, column, curses.color_pair(curses.COLOR_RED))
+                    else:
+                        # Write the column as is
+                        self.window.addstr(line_number, offset, column)
+                    # Add spacing for the next column
+                    offset += len(column) + 2
             except Exception:
                 break
             line_number += 1
