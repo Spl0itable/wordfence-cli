@@ -350,12 +350,21 @@ class LogBoxHandler(Handler):
 
 
 class LogBoxStream():
+    FILENAME_REGEX = r"(?<=\s)([^\s/]+\.[a-zA-Z]{2,4})(?=\s)"
 
     def __init__(self, log_box: LogBox):
         self.log_box = log_box
+        self.filename_regex = re.compile(self.FILENAME_REGEX)
 
     def write(self, line):
-        self.log_box.add_message(line)
+        highlighted_line = self.highlight_filenames(line)
+        self.log_box.add_message(highlighted_line)
+
+    def highlight_filenames(self, line):
+        return self.filename_regex.sub(
+            r"\033[91m\1\033[0m",
+            line
+        )
 
 
 class BoxLayout:
