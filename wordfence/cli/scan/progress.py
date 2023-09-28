@@ -598,6 +598,10 @@ class ProgressDisplay:
         layout = BoxLayout(size.lines, size.columns, self.METRICS_PADDING)
         if self.banner_box is not None:
             layout.add_box(self.banner_box)
+        for index, box in enumerate(self.metric_boxes):
+            layout.add_box(box)
+            if index == 0:
+                layout.add_break()
         layout.add_break()
         layout.add_box(self.log_box)
         layout.position()
