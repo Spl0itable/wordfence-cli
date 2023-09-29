@@ -501,9 +501,9 @@ class ProgressDisplay:
     METRICS_COUNT = 5
     MIN_MESSAGE_BOX_HEIGHT = 4
 
-    def __init__(self, worker_count: int):
+    def __init__(self):
         _displays.append(self)
-        self.worker_count = worker_count
+        self.worker_count = 3  # Change the worker count to 3
         self.results_message = None
         self.pending_resize = False
         self._setup_curses()
@@ -519,7 +519,7 @@ class ProgressDisplay:
     def _initialize_content(self, size: os.terminal_size) -> None:
         self.clear()
         self.banner_box = self._initialize_banner()
-        self.metric_boxes = self._initialize_metric_boxes()
+        self.metric_boxes = [MetricBox([], title='Summary', parent=self.stdscr)]
         self.log_box = self._initialize_log_box()
         self.layout = self._initialize_layout(size)
         self.refresh()
@@ -630,10 +630,7 @@ class ProgressDisplay:
         layout = BoxLayout(size.lines, size.columns, self.METRICS_PADDING)
         if self.banner_box is not None:
             layout.add_box(self.banner_box)
-        for index, box in enumerate(self.metric_boxes):
-            layout.add_box(box)
-            if index == 0:
-                layout.add_break()
+        layout.add_box(self.metric_boxes[0])  # Add the summary box
         layout.add_break()
         layout.add_box(self.log_box)
         layout.position()
