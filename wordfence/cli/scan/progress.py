@@ -703,11 +703,13 @@ class ProgressDisplay:
             except Exception:
                 pass
 
-    def scan_finished_handler(self, metrics: ScanMetrics, timer: timing.Timer) -> None:
+    def start_scan_handler(self) -> None:
         # Initialize the placeholder message
         placeholder_message = 'Scan in progress...'
         self._print_message_in_summary_box(placeholder_message)
-
+        self.stdscr.refresh()  # Refresh the screen to display the message
+    
+    def scan_finished_handler(self, metrics: ScanMetrics, timer: timing.Timer) -> None:
         # Handle the scan
         messages = default_scan_finished_handler(metrics, timer)
         self.results_message = messages.results
@@ -715,7 +717,9 @@ class ProgressDisplay:
         curses.curs_set(1)
 
         # Clear the placeholder message
+        placeholder_message = 'Scan in progress...'
         self._clear_message_in_summary_box(placeholder_message)
+        self.stdscr.refresh()  # Refresh the screen to clear the message
 
         # Proceed with the original method
         GREEN_TEXT = 3
