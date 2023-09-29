@@ -527,13 +527,8 @@ class ProgressDisplay:
     def _setup_colors(self) -> None:
         curses.start_color()
 
-        if curses.can_change_color() and curses.COLORS >= 256:
-            cyan_color = curses.COLOR_CYAN  # Use the default cyan color
-            curses.init_pair(1, cyan_color, curses.COLOR_BLACK)
-            self.color_brand = curses.color_pair(1)
-        else:
-            curses.init_pair(1, curses.COLOR_CYAN, curses.COLOR_BLACK)
-            self.color_brand = curses.color_pair(1)
+        curses.init_pair(CYAN_TEXT, curses.COLOR_CYAN, curses.COLOR_BLACK)
+        self.color_brand = curses.color_pair(1)
 
     def clear(self):
         self.stdscr.clear()
