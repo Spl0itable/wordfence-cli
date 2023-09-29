@@ -720,9 +720,12 @@ class ProgressDisplay:
         if self.log_box.has_file_paths:
             success_message += ' View scan results in "scan-results-" CSV file saved to doc root.'
 
+        # Calculate the x-coordinate for the success message using the position of the first worker box
+        success_x = self.metric_boxes[1].position.x + int((self.metric_boxes[1].get_width() - len(success_message)) / 2)
+
         # Print the success message in green and bold
         success_y = self.log_box.position.y + self.log_box.get_height() - 1
-        self.stdscr.addstr(success_y, self.log_box.position.x + 1, success_message)
+        self.stdscr.addstr(success_y, success_x, success_message)
 
         # Disable the color pair and bold attribute for the success message
         self.stdscr.attroff(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
