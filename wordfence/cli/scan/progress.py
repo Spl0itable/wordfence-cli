@@ -29,6 +29,45 @@ left and right borders. Each box on the same row will be separated by the
 padding value as well.
 """
 
+def start(self):
+    # Initialize curses
+    self.stdscr = curses.initscr()
+
+    # Enable mouse events
+    self.stdscr.keypad(True)
+    curses.mousemask(curses.BUTTON1_PRESSED | curses.REPORT_MOUSE_POSITION)
+
+    # Start the main loop
+    self.main_loop()
+
+def main_loop(self):
+    while True:
+        # Get the next input
+        c = self.stdscr.getch()
+
+        # Check if it's a mouse event
+        if c == curses.KEY_MOUSE:
+            # Get the mouse event
+            _, mx, my, _, _ = curses.getmouse()
+
+            # Check if the mouse event is a scroll up or down
+            if my < self.cursor_offset.y:
+                # Scroll up
+                self.scroll_up()
+            elif my > self.cursor_offset.y:
+                # Scroll down
+                self.scroll_down()
+
+        # Draw the content
+        self.draw_content()
+
+def scroll_up(self):
+    # Scroll up the content by decreasing the offset
+    self.offset = max(0, self.offset - 1)
+
+def scroll_down(self):
+    # Scroll down the content by increasing the offset
+    self.offset = min(len(self._map_messages_to_lines(self.offset)), self.offset + 1)
 
 def reset_terminal() -> None:
     for display in _displays:
