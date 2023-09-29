@@ -501,8 +501,9 @@ class ProgressDisplay:
     METRICS_COUNT = 5
     MIN_MESSAGE_BOX_HEIGHT = 4
 
-    def __init__(self):
+    def __init__(self, worker_count: int):
         _displays.append(self)
+        self.worker_count = worker_count
         self.results_message = None
         self.pending_resize = False
         self._setup_curses()
@@ -518,7 +519,7 @@ class ProgressDisplay:
     def _initialize_content(self, size: os.terminal_size) -> None:
         self.clear()
         self.banner_box = self._initialize_banner()
-        self.metric_boxes = [MetricBox([], title='Summary', parent=self.stdscr)]
+        self.metric_boxes = self._initialize_metric_boxes()
         self.log_box = self._initialize_log_box()
         self.layout = self._initialize_layout(size)
         self.refresh()
@@ -594,9 +595,27 @@ class ProgressDisplay:
             raise ValueError("Metrics count is out of sync")
         return metrics
 
-    def _initialize_metric_boxes(self):
-        # Remove the worker boxes
-        return [MetricBox([], title='Summary', parent=self.stdscr)]
+    def _initialize_metric_boxes(self) -> List[MetricBox]:
+        default_metrics = ScanMetrics(self.worker_count)
+        default_update = ScanProgressUpdate(
+                elapsed_time=0,
+                metrics=default_metrics
+            )
+        boxes = []
+        for index in range(0, self.worker_count + 1):
+            if index == 0:
+                worker_index = None
+                title = 'Summary'
+            else:
+                worker_index = index - 1
+                title = f'Worker {index}'
+            box = MetricBox(
+                    self._get_metrics(default_update, worker_index),
+                    title=title,
+                    parent=self.stdscr
+                )
+            boxes.append(box)
+        return boxes
 
     def _initialize_log_box(self) -> LogBox:
         log_box = LogBox(
@@ -607,11 +626,14 @@ class ProgressDisplay:
                 )
         return log_box
 
-    def _initialize_layout(self, size: os.terminal_size):
+    def _initialize_layout(self, size: os.terminal_size) -> BoxLayout:
         layout = BoxLayout(size.lines, size.columns, self.METRICS_PADDING)
         if self.banner_box is not None:
             layout.add_box(self.banner_box)
-        layout.add_box(self.metric_boxes[0])  # Add the summary box
+        for index, box in enumerate(self.metric_boxes):
+            layout.add_box(box)
+            if index == 0:
+                layout.add_break()
         layout.add_break()
         layout.add_box(self.log_box)
         layout.position()
