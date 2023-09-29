@@ -703,67 +703,42 @@ class ProgressDisplay:
             except Exception:
                 pass
 
-    def start_scan_handler(self) -> None:
-        # Initialize the placeholder message
-        placeholder_message = 'Scan in progress...'
-        self._print_message_in_summary_box(placeholder_message)
-        self.stdscr.refresh()  # Refresh the screen to display the message
-    
-    def scan_finished_handler(self, metrics: ScanMetrics, timer: timing.Timer) -> None:
-        # Handle the scan
+    def scan_finished_handler(
+        self, metrics: ScanMetrics, timer: timing.Timer
+    ) -> None:
         messages = default_scan_finished_handler(metrics, timer)
         self.results_message = messages.results
         self._move_cursor_to_log_end()
         curses.curs_set(1)
 
-        # Clear the placeholder message
-        placeholder_message = 'Scan in progress...'
-        self._clear_message_in_summary_box(placeholder_message)
-        self.stdscr.refresh()  # Refresh the screen to clear the message
-
-        # Proceed with the original method
+        # Enable the color pair for the success message
         GREEN_TEXT = 3
         BOLD_TEXT = curses.A_BOLD
         curses.init_pair(GREEN_TEXT, curses.COLOR_GREEN, curses.COLOR_BLACK)
-        self.stdscr.attron(curses.color_pair(GREEN_TEXT) | BOLD_TEXT) 
+        self.stdscr.attron(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
 
+        # Modify the success message based on whether file paths are present
         success_message = ' Scan completed! Press any key to exit.'
         if self.log_box.has_file_paths:
             success_message = 'Scan completed! Results saved to CSV.'
 
-        self._print_message_in_summary_box(success_message)
+        # Get the position and width of the "summary" box
+        summary_box = self.metric_boxes[0]
+        summary_box_position = summary_box.position
+        summary_box_width = summary_box.get_width()
 
-        self.stdscr.attroff(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)
+        # Calculate the y-coordinate for the success message
+        success_y = summary_box_position.y + summary_box.get_height() + 3
 
+        # Calculate the x-coordinate for the success message
+        success_x = summary_box_position.x + int((summary_box_width - len(success_message)) / 2)
+
+        # Print the success message in green and bold
+        self.stdscr.addstr(success_y, success_x, success_message)
+
+        # Disable the color pair and bold attribute for the success message
+        self.stdscr.attroff(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
+
+        # Set the scan completion flag and update the log box content
         self.log_box.scan_complete = True
         self.log_box.update()
-
-    def _print_message_in_summary_box(self, message: str) -> None:
-        # Get the position and width of the "summary" box
-        summary_box = self.metric_boxes[0]
-        summary_box_position = summary_box.position
-        summary_box_width = summary_box.get_width()
-
-        # Calculate the y-coordinate for the message
-        message_y = summary_box_position.y + summary_box.get_height() + 3
-
-        # Calculate the x-coordinate for the message
-        message_x = summary_box_position.x + int((summary_box_width - len(message)) / 2)
-
-        # Print the message
-        self.stdscr.addstr(message_y, message_x, message)
-
-    def _clear_message_in_summary_box(self, message: str) -> None:
-        # Get the position and width of the "summary" box
-        summary_box = self.metric_boxes[0]
-        summary_box_position = summary_box.position
-        summary_box_width = summary_box.get_width()
-
-        # Calculate the y-coordinate for the message
-        message_y = summary_box_position.y + summary_box.get_height() + 3
-
-        # Calculate the x-coordinate for the message
-        message_x = summary_box_position.x + int((summary_box_width - len(message)) / 2)
-
-        # Clear the message
-        self.stdscr.addstr(message_y, message_x, ' ' * len(message))
