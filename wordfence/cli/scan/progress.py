@@ -337,7 +337,7 @@ class LogBox(Box):
 
         # Write the "No malware found :)" message in green color only if there are no file paths and the scan is complete
         if not has_file_paths and self.scan_complete:
-            message = "No malware found :)"
+            message = "No malware found ٩(◕‿◕｡)۶"
             GREEN_TEXT = 3
             BOLD_TEXT = curses.A_BOLD
             curses.init_pair(GREEN_TEXT, curses.COLOR_GREEN, curses.COLOR_BLACK)
