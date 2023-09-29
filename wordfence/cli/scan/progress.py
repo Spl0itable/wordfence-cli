@@ -583,11 +583,13 @@ class ProgressDisplay:
             byte_rate = self._compute_rate(byte_count, update.elapsed_time)
             match_count = update.metrics.get_int_metric('matches', worker_index)
 
+            # Add 'Matches Found' to the top of the list
+            metrics = [Metric('Matches Found', match_count)] + metrics
+
             metrics.extend([
-                Metric('Matches Found', match_count),
                 Metric('Bytes Processed', byte_count),
                 Metric('Files / Second', file_rate),
-                Metric('Bytes / Second', byte_rate)
+                Metric('Bytes / Second', byte_rate),
             ])
 
         if len(metrics) > self.METRICS_COUNT:
