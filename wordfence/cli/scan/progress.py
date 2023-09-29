@@ -605,7 +605,6 @@ class ProgressDisplay:
                 worker_index = index - 1
                 title = f' Worker {index} '
             box = MetricBox(
-                    self._get_metrics(default_update, worker_index),
                     title=title,
                     parent=self.stdscr
                 )
