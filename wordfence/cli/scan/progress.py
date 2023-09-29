@@ -701,9 +701,7 @@ class ProgressDisplay:
             except Exception:
                 pass
 
-    def scan_finished_handler(
-        self, metrics: ScanMetrics, timer: timing.Timer
-    ) -> None:
+    def scan_finished_handler(self, metrics: ScanMetrics, timer: timing.Timer) -> None:
         messages = default_scan_finished_handler(metrics, timer)
         self.results_message = messages.results
         self._move_cursor_to_log_end()
