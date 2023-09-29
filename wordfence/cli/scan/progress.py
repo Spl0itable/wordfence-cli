@@ -718,7 +718,7 @@ class ProgressDisplay:
         # Modify the success message based on whether file paths are present
         success_message = 'Scan completed! Press any key to exit.'
         if self.log_box.has_file_paths:
-            success_message = 'Scan completed! Results saved to CSV.'
+            success_message = 'Scan completed! Results saved to CSV. '
 
         # Get the position and width of the "summary" box
         summary_box = self.metric_boxes[0]
