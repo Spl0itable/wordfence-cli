@@ -723,7 +723,7 @@ class ProgressDisplay:
         # Print the success message in green and bold
         log_box_height = self.log_box.get_height()
         filepath_log_height = log_box_height if self.log_box.has_file_paths else 0
-        success_y = self.log_box.position.y + filepath_log_height - 1
+        success_y = self.log_box.position.y + filepath_log_height - 2
         self.stdscr.addstr(success_y, self.log_box.position.x + 1, success_message)
 
         # Disable the color pair and bold attribute for the success message
