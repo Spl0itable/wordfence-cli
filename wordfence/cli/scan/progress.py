@@ -729,7 +729,7 @@ class ProgressDisplay:
         success_y = summary_box_position.y + summary_box.get_height() - 1
 
         # Calculate the x-coordinate for the success message
-        success_x = summary_box_position.x + int((summary_box_width - len(success_message)) / 2)
+        success_x = summary_box_position.x + int((summary_box_width - len(success_message)) / 4)
 
         # Print the success message in green and bold
         self.stdscr.addstr(success_y, success_x, success_message)
