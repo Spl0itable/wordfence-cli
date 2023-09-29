@@ -587,9 +587,7 @@ class ProgressDisplay:
             metrics = [Metric('Matches Found', match_count)] + metrics
 
             metrics.extend([
-                Metric('Bytes Processed', byte_count),
                 Metric('Files / Second', file_rate),
-                Metric('Bytes / Second', byte_rate),
             ])
 
         if len(metrics) > self.METRICS_COUNT:
