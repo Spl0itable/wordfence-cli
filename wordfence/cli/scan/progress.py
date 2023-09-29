@@ -698,7 +698,7 @@ class ProgressDisplay:
 
     def scan_finished_handler(
         self, metrics: ScanMetrics, timer: timing.Timer
-    ) -> None:
+        ) -> None:
         messages = default_scan_finished_handler(metrics, timer)
         self.results_message = messages.results
         self._move_cursor_to_log_end()
@@ -720,14 +720,17 @@ class ProgressDisplay:
         summary_box_position = summary_box.position
         summary_box_width = summary_box.get_width()
 
-        # Calculate the y-coordinate for the success message
-        success_y = summary_box_position.y + summary_box.get_height() + 3
-
         # Calculate the x-coordinate for the success message
         success_x = summary_box_position.x + int((summary_box_width - len(success_message)) / 2)
 
+        # Calculate the y-coordinate for the success and placeholder messages
+        success_y = summary_box_position.y + summary_box.get_height() + 2
+
+        # Print the placeholder message
+        self.stdscr.addstr(success_y, success_x, "Scanning")
+
         # Print the success message in green and bold
-        self.stdscr.addstr(success_y, success_x, success_message)
+        self.stdscr.addstr(success_y, success_x + len("Scanning"), success_message)
 
         # Disable the color pair and bold attribute for the success message
         self.stdscr.attroff(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
