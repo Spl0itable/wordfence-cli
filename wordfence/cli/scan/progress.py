@@ -598,28 +598,16 @@ class ProgressDisplay:
     def _initialize_metric_boxes(self) -> List[MetricBox]:
         default_metrics = ScanMetrics(self.worker_count)
         default_update = ScanProgressUpdate(
-                elapsed_time=0,
-                metrics=default_metrics
-            )
+            elapsed_time=0,
+            metrics=default_metrics
+        )
         boxes = []
-        for index in range(0, self.worker_count + 1):
-            if index == 0:
-                worker_index = None
-                title = 'Summary'
-                metrics = self._get_metrics(default_update, worker_index)
-            
-            # Add the scan results message as a new metric for the summary box
-            if self.results_message is not None:
-                metrics.append(Metric(self.results_message, ""))
-            else:
-                worker_index = index - 1
-                title = f'Worker {index}'
-            box = MetricBox(
-                    self._get_metrics(default_update, worker_index),
-                    title=title,
-                    parent=self.stdscr
-                )
-            boxes.append(box)
+        box = MetricBox(
+            self._get_metrics(default_update, None),
+            title='Summary',
+            parent=self.stdscr
+        )
+        boxes.append(box)
         return boxes
 
     def _initialize_log_box(self) -> LogBox:
