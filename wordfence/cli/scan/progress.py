@@ -575,20 +575,24 @@ class ProgressDisplay:
                 worker_index: Optional[int] = None
             ) -> List[Metric]:
         file_count = update.metrics.get_int_metric('counts', worker_index)
-        byte_count = update.metrics.get_int_metric('bytes', worker_index)
-        file_rate = self._compute_rate(file_count, update.elapsed_time)
-        byte_rate = self._compute_rate(byte_count, update.elapsed_time)
-        metrics = [
-                Metric('Files Processed', file_count),
+        metrics = [Metric('Files Processed', file_count)]
+        
+        if worker_index is None:
+            byte_count = update.metrics.get_int_metric('bytes', worker_index)
+            file_rate = self._compute_rate(file_count, update.elapsed_time)
+            byte_rate = self._compute_rate(byte_count, update.elapsed_time)
+            match_count = update.metrics.get_int_metric('matches', worker_index)
+
+            metrics.extend([
                 Metric('Bytes Processed', byte_count),
                 Metric('Files / Second', file_rate),
-                Metric('Bytes / Second', byte_rate)
-            ]
-        if worker_index is None:
-            match_count = update.metrics.get_int_metric('matches', worker_index)
-            metrics.insert(0, Metric('Matches Found', match_count))
+                Metric('Bytes / Second', byte_rate),
+                Metric('Matches Found', match_count)
+            ])
+
         if len(metrics) > self.METRICS_COUNT:
             raise ValueError("Metrics count is out of sync")
+
         return metrics
 
     def _initialize_metric_boxes(self) -> List[MetricBox]:
