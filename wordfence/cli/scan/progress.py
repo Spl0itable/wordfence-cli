@@ -234,7 +234,7 @@ class BannerBox(Box):
         return ""
 
 
-DEFAULT_MAX_MESSAGES = 512
+DEFAULT_MAX_MESSAGES = 512000
 
 
 class LogBox(Box):
