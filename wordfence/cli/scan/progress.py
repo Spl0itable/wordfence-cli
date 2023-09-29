@@ -724,13 +724,22 @@ class ProgressDisplay:
         success_x = summary_box_position.x + int((summary_box_width - len(success_message)) / 2)
 
         # Calculate the y-coordinate for the success and placeholder messages
-        success_y = summary_box_position.y + summary_box.get_height() + 2
+        message_y = summary_box_position.y + summary_box.get_height() + 2
 
-        # Print the placeholder message
-        self.stdscr.addstr(success_y, success_x, "Scanning")
+        # Print the scanning message
+        self.stdscr.addstr(message_y, success_x, "Scanning")
+
+        # Refresh the screen to display the scanning message
+        self.stdscr.refresh()
+
+        # Wait for a short duration to display the scanning message
+        time.sleep(1)
+
+        # Clear the scanning message
+        self.stdscr.addstr(message_y, success_x, " " * len("Scanning"))
 
         # Print the success message in green and bold
-        self.stdscr.addstr(success_y, success_x + len("Scanning"), success_message)
+        self.stdscr.addstr(message_y, success_x, success_message)
 
         # Disable the color pair and bold attribute for the success message
         self.stdscr.attroff(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
