@@ -502,10 +502,10 @@ class ProgressDisplay:
     MIN_MESSAGE_BOX_HEIGHT = 4
 
     def __init__(self, worker_count: int):
+        _displays.append(self)
         self.worker_count = worker_count
         self.results_message = None
         self.pending_resize = False
-        self.insufficient_size = False  # Flag to track insufficient terminal size
         self._setup_curses()
 
     def _setup_curses(self) -> None:
@@ -523,19 +523,6 @@ class ProgressDisplay:
         self.log_box = self._initialize_log_box()
         self.layout = self._initialize_layout(size)
         self.refresh()
-        if self.insufficient_size:
-            self.resize_terminal()
-
-    def resize_terminal(self) -> None:
-        curses.flushinp()
-        self.stdscr.nodelay(True)
-        while True:
-            self.stdscr.getch()
-            self.resize()
-            if not self.insufficient_size:
-                break
-            sleep(0.1)
-        self.stdscr.nodelay(False)
 
     def _setup_colors(self) -> None:
         curses.start_color()
@@ -556,7 +543,15 @@ class ProgressDisplay:
         curses.doupdate()
 
     def end_on_input(self):
-        self.resize_terminal()
+        curses.flushinp()
+        self.stdscr.nodelay(True)
+        while True:
+            key = self.stdscr.getch()
+            if key != -1 and key != curses.KEY_RESIZE:
+                break
+            if self._resize_if_necessary():
+                self._move_cursor_to_log_end()
+            sleep(0.1)
         self.end()
 
     def end(self):
@@ -603,16 +598,23 @@ class ProgressDisplay:
     def _initialize_metric_boxes(self) -> List[MetricBox]:
         default_metrics = ScanMetrics(self.worker_count)
         default_update = ScanProgressUpdate(
-            elapsed_time=0,
-            metrics=default_metrics
-        )
+                elapsed_time=0,
+                metrics=default_metrics
+            )
         boxes = []
-        box = MetricBox(
-            self._get_metrics(default_update, None),
-            title='Summary',
-            parent=self.stdscr
-        )
-        boxes.append(box)
+        for index in range(0, self.worker_count + 1):
+            if index == 0:
+                worker_index = None
+                title = 'Summary'
+            else:
+                worker_index = index - 1
+                title = f'Worker {index}'
+            box = MetricBox(
+                    self._get_metrics(default_update, worker_index),
+                    title=title,
+                    parent=self.stdscr
+                )
+            boxes.append(box)
         return boxes
 
     def _initialize_log_box(self) -> LogBox:
@@ -671,10 +673,6 @@ class ProgressDisplay:
             self.layout.resize(size.lines, size.columns)
         self.layout.update_content()
         self.refresh()
-        if self.layout.current_line > size.lines:
-            self.insufficient_size = True
-        else:
-            self.insufficient_size = False
 
     def _resize_if_necessary(self) -> bool:
         if not self.pending_resize:
