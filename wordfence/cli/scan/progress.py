@@ -701,7 +701,9 @@ class ProgressDisplay:
             except Exception:
                 pass
 
-    def scan_finished_handler(self, metrics: ScanMetrics, timer: timing.Timer) -> None:
+    def scan_finished_handler(
+        self, metrics: ScanMetrics, timer: timing.Timer
+    ) -> None:
         messages = default_scan_finished_handler(metrics, timer)
         self.results_message = messages.results
         self._move_cursor_to_log_end()
@@ -718,8 +720,12 @@ class ProgressDisplay:
         if self.log_box.has_file_paths:
             success_message += ' View scan results in "scan-results-" CSV file saved to doc root.'
 
-        # Calculate the x-coordinate for the success message using the position of the first worker box
-        success_x = self.metric_boxes[1].position.x + int((self.metric_boxes[1].get_width() - len(success_message)) / 2)
+        # Get the width of the "summary" box
+        summary_box = self.metric_boxes[0]
+        summary_box_width = summary_box.get_width()
+
+        # Calculate the x-coordinate for the success message
+        success_x = summary_box.position.x + int((summary_box_width - len(success_message)) / 2)
 
         # Print the success message in green and bold
         success_y = self.log_box.position.y + self.log_box.get_height() - 1
