@@ -726,7 +726,7 @@ class ProgressDisplay:
         summary_box_width = summary_box.get_width()
 
         # Calculate the y-coordinate for the success message
-        success_y = summary_box_position.y + summary_box.get_height() - 0
+        success_y = summary_box_position.y + summary_box.get_height() + 3
 
         # Calculate the x-coordinate for the success message
         success_x = summary_box_position.x + int((summary_box_width - len(success_message)) / 2)
