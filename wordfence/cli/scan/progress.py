@@ -606,6 +606,11 @@ class ProgressDisplay:
             if index == 0:
                 worker_index = None
                 title = 'Summary'
+                metrics = self._get_metrics(default_update, worker_index)
+            
+            # Add the scan results message as a new metric for the summary box
+            if self.results_message is not None:
+                metrics.append(Metric(self.results_message, ""))
             else:
                 worker_index = index - 1
                 title = f'Worker {index}'
@@ -720,19 +725,9 @@ class ProgressDisplay:
         if self.log_box.has_file_paths:
             success_message += ' View scan results in "scan-results-" CSV file saved to doc root.'
 
-        # Get the position and width of the "summary" box
-        summary_box = self.metric_boxes[0]
-        summary_box_position = summary_box.position
-        summary_box_width = summary_box.get_width()
-
-        # Calculate the y-coordinate for the success message
-        success_y = summary_box_position.y + summary_box.get_height() - 1
-
-        # Calculate the x-coordinate for the success message
-        success_x = summary_box_position.x + int((summary_box_width - len(success_message)) / 2)
-
         # Print the success message in green and bold
-        self.stdscr.addstr(success_y, success_x, success_message)
+        success_y = self.log_box.position.y + self.log_box.get_height() - 1
+        self.stdscr.addstr(success_y, self.log_box.position.x + 1, success_message)
 
         # Disable the color pair and bold attribute for the success message
         self.stdscr.attroff(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
