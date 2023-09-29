@@ -503,7 +503,6 @@ class ProgressDisplay:
 
     def __init__(self):
         _displays.append(self)
-        self.worker_count = 3  # Change the worker count to 3
         self.results_message = None
         self.pending_resize = False
         self._setup_curses()
@@ -595,27 +594,9 @@ class ProgressDisplay:
             raise ValueError("Metrics count is out of sync")
         return metrics
 
-    def _initialize_metric_boxes(self) -> List[MetricBox]:
-        default_metrics = ScanMetrics(self.worker_count)
-        default_update = ScanProgressUpdate(
-                elapsed_time=0,
-                metrics=default_metrics
-            )
-        boxes = []
-        for index in range(0, self.worker_count + 1):
-            if index == 0:
-                worker_index = None
-                title = 'Summary'
-            else:
-                worker_index = index - 1
-                title = f'Worker {index}'
-            box = MetricBox(
-                    self._get_metrics(default_update, worker_index),
-                    title=title,
-                    parent=self.stdscr
-                )
-            boxes.append(box)
-        return boxes
+    def _initialize_metric_boxes(self):
+        # Remove the worker boxes
+        return [MetricBox([], title='Summary', parent=self.stdscr)]
 
     def _initialize_log_box(self) -> LogBox:
         log_box = LogBox(
@@ -626,7 +607,7 @@ class ProgressDisplay:
                 )
         return log_box
 
-    def _initialize_layout(self, size: os.terminal_size) -> BoxLayout:
+    def _initialize_layout(self, size: os.terminal_size):
         layout = BoxLayout(size.lines, size.columns, self.METRICS_PADDING)
         if self.banner_box is not None:
             layout.add_box(self.banner_box)
