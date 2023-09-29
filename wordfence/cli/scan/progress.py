@@ -731,10 +731,18 @@ class ProgressDisplay:
         # Calculate the x-coordinate for the success message
         success_x = summary_box_position.x + int((summary_box_width - len(success_message)) / 2)
 
-        # Print the success message in green and bold
-        self.stdscr.addstr(success_y, success_x, success_message)
+        # Calculate the maximum width for the messages
+        max_width = summary_box_width - 2  # Adjust for padding
 
-        # Disable the color pair and bold attribute for the success message
+        # Truncate messages if they exceed the maximum width
+        messages.results = messages.results[:max_width]
+        success_message = success_message[:max_width]
+
+        # Print the messages in green and bold
+        self.stdscr.addstr(success_y, success_x, success_message)
+        self.stdscr.addstr(success_y + 1, summary_box_position.x + 1, messages.results)
+
+        # Disable the color pair and bold attribute for the messages
         self.stdscr.attroff(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
 
         # Set the scan completion flag and update the log box content
