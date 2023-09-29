@@ -578,9 +578,7 @@ class ProgressDisplay:
         metrics = [Metric('Files Processed', file_count)]
         
         if worker_index is None:
-            byte_count = update.metrics.get_int_metric('bytes', worker_index)
             file_rate = self._compute_rate(file_count, update.elapsed_time)
-            byte_rate = self._compute_rate(byte_count, update.elapsed_time)
             match_count = update.metrics.get_int_metric('matches', worker_index)
 
             # Add 'Matches Found' to the top of the list
