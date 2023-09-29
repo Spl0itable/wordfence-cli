@@ -528,7 +528,7 @@ class ProgressDisplay:
         curses.start_color()
 
         if curses.can_change_color() and curses.COLORS >= 256:
-            cyan_color = 69 if curses.COLORS == 69 else 255
+            cyan_color = 1 if curses.COLORS == 1 else 1
             curses.init_pair(1, cyan_color, curses.COLOR_BLACK)
             self.color_brand = curses.color_pair(1)
         else:
