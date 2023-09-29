@@ -580,9 +580,9 @@ class ProgressDisplay:
         file_rate = self._compute_rate(file_count, update.elapsed_time)
         byte_rate = self._compute_rate(byte_count, update.elapsed_time)
         metrics = [
+                Metric('Matches Found', match_count),
                 Metric('Files Processed', file_count),
                 Metric('Bytes Processed', byte_count),
-                Metric('Matches Found', match_count),
                 Metric('Files / Second', file_rate),
                 Metric('Bytes / Second', byte_rate)
             ]
