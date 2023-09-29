@@ -716,9 +716,9 @@ class ProgressDisplay:
         self.stdscr.attron(curses.color_pair(GREEN_TEXT) | BOLD_TEXT)  # Combine color and bold attributes
 
         # Modify the success message based on whether file paths are present
-        success_message = 'Scan completed! Press any key to exit.\n'
+        success_message = 'Scan completed!'
         if self.log_box.has_file_paths:
-            success_message += 'Results saved in "scan-results-" CSV file.\n'
+            success_message += ' Results saved to CSV file.'
 
         # Get the position and width of the "summary" box
         summary_box = self.metric_boxes[0]
@@ -728,9 +728,8 @@ class ProgressDisplay:
         # Calculate the y-coordinate for the success message
         success_y = summary_box_position.y + summary_box.get_height() + 3
 
-        # Calculate the x-coordinate for the success message with maximum width
-        max_success_width = min(len(success_message), summary_box_width)
-        success_x = summary_box_position.x + int((summary_box_width - max_success_width) / 2)
+        # Calculate the x-coordinate for the success message
+        success_x = summary_box_position.x + int((summary_box_width - len(success_message)) / 2)
 
         # Print the success message in green and bold
         self.stdscr.addstr(success_y, success_x, success_message)
