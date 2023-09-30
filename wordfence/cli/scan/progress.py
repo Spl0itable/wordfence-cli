@@ -695,20 +695,11 @@ class ProgressDisplay:
     def get_output_stream(self) -> LogBoxStream:
         return LogBoxStream(self.log_box)
 
-    def _move_cursor_to_log_end(self) -> None:
-        cursor_position = self.log_box.get_cursor_position()
-        if cursor_position is not None:
-            try:
-                self.stdscr.move(cursor_position.y, cursor_position.x + 1)
-            except Exception:
-                pass
-
     def scan_finished_handler(
         self, metrics: ScanMetrics, timer: timing.Timer
     ) -> None:
         messages = default_scan_finished_handler(metrics, timer)
         self.results_message = messages.results
-        self._move_cursor_to_log_end()
         curses.curs_set(1)
 
         # Enable the color pair for the success message
