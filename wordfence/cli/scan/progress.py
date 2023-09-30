@@ -708,7 +708,7 @@ class ProgressDisplay:
     ) -> None:
         messages = default_scan_finished_handler(metrics, timer)
         self.results_message = messages.results
-        # self._move_cursor_to_log_end()
+        self._move_cursor_to_log_end()
         curses.curs_set(1)
 
         # Enable the color pair for the success message
