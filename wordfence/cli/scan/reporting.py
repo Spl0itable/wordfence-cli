@@ -65,11 +65,13 @@ class CsvReportWriter(ReportWriter):
         self.writer.writerow(highlighted_row)
 
     def highlight_filenames(self, item):
-        filename_regex = re.compile(self.FILENAME_REGEX)
-        return filename_regex.sub(
-            lambda match: curses.color_pair(1) + match.group(1) + curses.color_pair(0),
-            item
-        )
+        if isinstance(item, str):
+            filename_regex = re.compile(self.FILENAME_REGEX)
+            return filename_regex.sub(
+                lambda match: curses.color_pair(1) + match.group(1) + curses.color_pair(0),
+                item
+            )
+        return item
 
 
 class TsvReportWriter(CsvReportWriter):
