@@ -126,7 +126,7 @@ class HumanReadableWriter(ReportWriter):
                     )
         else:
             self._target.write(
-                    "Match found: " + str(values)
+                    "Match found: " + str(values) + "\n"
                 )
         self._target.write("\n")
 
