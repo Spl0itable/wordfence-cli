@@ -1,7 +1,10 @@
 import logging
 from typing import Optional
 
+from .formatting import ColoredFormatter
+
 DEFAULT_LOGGER_NAME = 'wordfence'
+VERBOSE = 15
 
 logging.basicConfig(format='%(message)s')
 log = logging.getLogger(DEFAULT_LOGGER_NAME)
@@ -26,3 +29,7 @@ def restore_initial_handler(error_if_not_set: bool = False) -> None:
         return
     root_log.addHandler(initial_handler)
     initial_handler = None
+
+
+def enable_log_colors() -> None:
+    root_log.handlers[0].setFormatter(ColoredFormatter())

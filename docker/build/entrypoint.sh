@@ -4,61 +4,73 @@ set -e
 cd /root/wordfence-cli
 
 ARCHITECTURE=$(dpkg --print-architecture)
-VERSION=$(python3 -c "from wordfence import version; print(version.__version__)")
-CHANGELOG_VERSION=$(head -n 1 /root/debian/changelog | sed -n -E 's/wordfence \(([^)]+)\).*/\1/p')
 
-if [ "$CHANGELOG_VERSION" != "$VERSION" ]; then
-  DEBFULLNAME=Wordfence
-  DEBEMAIL=opensource@wordfence.com
-  export DEBFULLNAME
-  export DEBEMAIL
-  echo "Changelog verison $CHANGELOG_VERSION does not equal pyproject.toml version $VERSION -- updating changelog"
-  cd /root/debian
+if [ "$PACKAGE_TYPE" = 'deb' ] || [ "$PACKAGE_TYPE" = 'all' ]; then
+
+  # build deb package
+
+  VERSION=$(python3 -c 'from wordfence import version; print(version.__version__)')
+
+  # install build requirements
+  python3 -m pip install --upgrade pip
+  python3 -m pip install -r requirements.txt --force-reinstall
+
+  export DEBFULLNAME='Wordfence'
+  export DEBEMAIL='opensource@wordfence.com'
+  echo 'Generating changelog'
   dch \
     --distribution unstable \
     --check-dirname-level 0 \
     --package wordfence \
     --newversion "$VERSION" \
-    "$VERSION release. See https://github.com/wordfence/wordfence-cli for release notes."
-  cd /root/wordfence-cli
+    --create \
+    "${VERSION} release. See https://github.com/wordfence/wordfence-cli/releases/latest for release notes."
+
+  # build the package
+  dpkg-buildpackage -us -uc -b
+
+  # copy to output volume
+  pushd ..
+  DEB_FILENAME="wordfence_${VERSION}_all"
+  cp "${DEB_FILENAME}.deb" /root/output/wordfence.deb
+  popd
+
 fi
 
-# install requirements
-pip install --upgrade pip
-pip install -r requirements.txt
+if [ "$PACKAGE_TYPE" = 'standalone' ] || [ "$PACKAGE_TYPE" = 'all' ]; then
 
-pyinstaller \
-  --name wordfence \
-  --onefile \
-  --hidden-import wordfence.cli.scan \
-  --hidden-import wordfence.cli.scan.config \
-  main.py
+  # build standalone executable
+  
+  VERSION=$(python3.8 -c 'from wordfence import version; print(version.__version__)')
 
-pushd /root/wordfence-cli/dist
+  # install build requirements
+  python3.8 -m pip install --upgrade pip
+  python3.8 -m pip install -r requirements.txt --force-reinstall
+  # Ubuntu 18.04 requires this additional package (as well as the OS package libffi-dev)
+  python3.8 -m pip install cffi
 
-# compress the standalone executable, checksum and sign it, and copy both to the output directory
-STANDALONE_FILENAME="wordfence_${VERSION}_${ARCHITECTURE}_linux_exec"
-tar -czvf "${STANDALONE_FILENAME}.tar.gz" wordfence
-sha256sum "${STANDALONE_FILENAME}.tar.gz" > "${STANDALONE_FILENAME}.tar.gz.sha256"
-gpg \
-  --homedir "$CONTAINER_GPG_HOME_DIR" \
-  --detach-sign \
-  --armor \
-  --local-user '=Wordfence <opensource@wordfence.com>' \
-  "${STANDALONE_FILENAME}.tar.gz"
-gpg \
-  --homedir "$CONTAINER_GPG_HOME_DIR" \
-  --detach-sign \
-  --armor \
-  --local-user '=Wordfence <opensource@wordfence.com>' \
-  "${STANDALONE_FILENAME}.tar.gz.sha256"
-cp \
-  "${STANDALONE_FILENAME}.tar.gz" \
-  "${STANDALONE_FILENAME}.tar.gz.asc" \
-  "${STANDALONE_FILENAME}.tar.gz.sha256" \
-  "${STANDALONE_FILENAME}.tar.gz.sha256.asc" \
-  /root/output
+  pyinstaller \
+    --name wordfence \
+    --onefile \
+    --hidden-import wordfence.cli.configure.configure \
+    --hidden-import wordfence.cli.configure.definition \
+    --hidden-import wordfence.cli.malwarescan.malwarescan \
+    --hidden-import wordfence.cli.malwarescan.definition \
+    --hidden-import wordfence.cli.vulnscan.vulnscan \
+    --hidden-import wordfence.cli.vulnscan.definition \
+    --hidden-import wordfence.cli.help.help \
+    --hidden-import wordfence.cli.help.definition \
+    --hidden-import wordfence.cli.version.version \
+    --hidden-import wordfence.cli.version.definition \
+    main.py
 
-popd
+  # compress and copy to output volume
+  pushd /root/wordfence-cli/dist
+  STANDALONE_FILENAME="wordfence_${VERSION}_${ARCHITECTURE}_linux_exec"
+  tar -czvf "${STANDALONE_FILENAME}.tar.gz" wordfence
+  cp "${STANDALONE_FILENAME}.tar.gz" "/root/output/wordfence_${ARCHITECTURE}.tar.gz"
+  popd
 
-ls -lah "/root/output"
+fi
+
+ls -lah /root/output
