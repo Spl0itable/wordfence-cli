@@ -112,5 +112,5 @@ def should_show_welcome_banner(banner_enabled):
 
 def show_welcome_banner_if_enabled(config) -> None:
     if should_show_welcome_banner(config.banner) and \
-            not config.quiet and not config.progress:
+            not config.progress:
         show_welcome_banner()
