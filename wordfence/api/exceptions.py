@@ -8,9 +8,5 @@ class ApiException(Exception):
                 internal_message: str,
                 public_message: Optional[str] = None
             ):
-        if public_message is not None:
-            message = f'{internal_message}: {public_message}'
-        else:
-            message = internal_message
-        super().__init__(message)
+        super().__init__(f'{internal_message}: {public_message}')
         self.public_message = public_message

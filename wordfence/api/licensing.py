@@ -14,12 +14,7 @@ class License:
 
 
 class LicenseRequiredException(ApiException):
-
-    def __init__(self):
-        super().__init__(
-                'License required',
-                'A valid Wordfence CLI license is required'
-            )
+    pass
 
 
 class LicenseSpecific:

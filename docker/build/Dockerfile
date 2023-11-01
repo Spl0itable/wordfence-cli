@@ -1,14 +1,12 @@
-FROM ubuntu:22.04
+FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y debsigs \
+    dpkg-sig \
     devscripts \
     debhelper \
-    dh-python \
     python3 \
-    python3-all \
-    python3-pip \
-    pybuild-plugin-pyproject
+    python3-pip
 
 COPY ./docker/build/entrypoint.sh /root/entrypoint.sh
 COPY ./ /root/wordfence-cli

@@ -1,13 +1,37 @@
+import re
+from typing import Dict, Any
+
+from ..reporting import ReportFormat, ReportColumn
+from wordfence.cli.config.defaults import INI_DEFAULT_PATH
 from wordfence.util.pcre import PCRE_DEFAULT_MATCH_LIMIT, \
         PCRE_DEFAULT_MATCH_LIMIT_RECURSION
-from wordfence.util.units import byte_length
 
-from ..subcommands import SubcommandDefinition, UsageExample
-from ..config.typing import ConfigDefinitions
-from .reporting import SCAN_REPORT_CONFIG_OPTIONS
+KIBIBYTE = 1024
+MEBIBYTE = 1024 * 1024
+
+sizings_map = {
+    'b': 1,
+    'k': KIBIBYTE,
+    'kb': KIBIBYTE,
+    'kib': KIBIBYTE,
+    'm': MEBIBYTE,
+    'mb': MEBIBYTE,
+    'mib': MEBIBYTE
+}
+"""maps suffixes to byte multipliers; k/kb/kib are synonyms, as are m/mb/mib"""
 
 
-config_definitions: ConfigDefinitions = {
+def byte_length(conversion_value: str) -> int:
+    match = re.search(r"(\d+)([^0-9].*)", conversion_value)
+    if not match:
+        raise ValueError("Invalid format for byte length type")
+    suffix = match.group(2).lower()
+    if not sizings_map.get(suffix, False):
+        raise ValueError("Unrecognized byte length suffix")
+    return int(match.group(1)) * sizings_map.get(suffix)
+
+
+config_definitions: Dict[str, Dict[str, Any]] = {
     "read-stdin": {
         "description": "Read paths from stdin. If not specified, paths will "
                        "automatically be read from stdin when input is not "
@@ -25,7 +49,47 @@ config_definitions: ConfigDefinitions = {
         "default": "AA==",
         "default_type": "base64"
     },
-    **SCAN_REPORT_CONFIG_OPTIONS,
+    "output": {
+        "description": "Write results to stdout. This is the default behavior "
+                       "when --output-path is not specified. Use --no-output "
+                       "to disable.",
+        "context": "ALL",
+        "argument_type": "OPTIONAL_FLAG",
+        "default": None
+    },
+    "output-path": {
+        "description": "Path to which to write results.",
+        "context": "ALL",
+        "argument_type": "OPTION",
+        "default": None,
+    },
+    "output-columns": {
+        "description": ("An ordered, comma-delimited list of columns to"
+                        " include in the output. Available columns: "
+                        + ReportColumn.get_valid_options_as_string()),
+        "context": "ALL",
+        "argument_type": "OPTION",
+        "default": "filename",
+        "meta": {
+            "separator": ","
+        }
+    },
+    "output-format": {
+        "short_name": "m",
+        "description": "Output format used for result data.",
+        "context": "ALL",
+        "argument_type": "OPTION",
+        "default": 'csv',
+        "meta": {
+            "valid_options": ReportFormat.get_valid_options()
+        }
+    },
+    "output-headers": {
+        "description": "Whether or not to include column headers in output",
+        "context": "ALL",
+        "argument_type": "FLAG",
+        "default": None
+    },
     "exclude-signatures": {
         "short_name": "e",
         "description": "Specify rule IDs to exclude from the scan. Can be "
@@ -56,14 +120,6 @@ config_definitions: ConfigDefinitions = {
         "argument_type": "FLAG",
         "default": False
     },
-    "include-all-files": {
-        "short_name": "a",
-        "description": "Scan all files. By default, only files matching "
-                       "certain extensions are scanned",
-        "context": "ALL",
-        "argument_type": "FLAG",
-        "default": False
-    },
     "include-files": {
         "short_name": "n",
         "description": "Only scan filenames that are exact matches. Can be "
@@ -89,8 +145,8 @@ config_definitions: ConfigDefinitions = {
     },
     "include-files-pattern": {
         "short_name": "N",
-        "description": "Python regex allow pattern. Only matching filenames "
-                       "will be scanned.",
+        "description": "PCRE regex allow pattern. Only matching filenames will"
+                       " be scanned.",
         "context": "ALL",
         "argument_type": "OPTION_REPEATABLE",
         "default": None,
@@ -100,8 +156,8 @@ config_definitions: ConfigDefinitions = {
     },
     "exclude-files-pattern": {
         "short_name": "X",
-        "description": "Python regex deny pattern. Matching filenames will "
-                       "not be scanned.",
+        "description": "PCRE regex deny pattern. Matching filenames will not "
+                       "be scanned.",
         "context": "ALL",
         "argument_type": "OPTION_REPEATABLE",
         "default": None,
@@ -115,7 +171,7 @@ config_definitions: ConfigDefinitions = {
                        "be skipped and a warning will be logged.",
         "context": "ALL",
         "argument_type": "FLAG",
-        "default": True
+        "default": False
     },
     "chunk-size": {
         "short_name": "z",
@@ -177,6 +233,69 @@ config_definitions: ConfigDefinitions = {
         "argument_type": "OPTION",
         "default": 1
     },
+    "configuration": {
+        "short_name": "c",
+        "description": "Path to a configuration INI file to use (defaults to"
+                       f" \"{INI_DEFAULT_PATH}\").",
+        "context": "CLI",
+        "argument_type": "OPTION",
+        "default": INI_DEFAULT_PATH
+    },
+    "license": {
+        "short_name": "l",
+        "description": "Specify the license to use.",
+        "context": "ALL",
+        "argument_type": "OPTION",
+        "default": None
+    },
+    "cache-directory": {
+        "description": "A path to use for cache files.",
+        "context": "ALL",
+        "argument_type": "OPTION",
+        "default": "~/.cache/wordfence"
+    },
+    "cache": {
+        "description": "Whether or not to enable the cache.",
+        "context": "ALL",
+        "argument_type": "FLAG",
+        "default": True
+    },
+    "purge-cache": {
+        "description": "Purge any existing values from the cache.",
+        "context": "CLI",
+        "argument_type": "FLAG",
+        "default": False
+    },
+    "verbose": {
+        "short_name": "v",
+        "description": "Enable verbose logging. If not specified, verbose "
+                       "logging will be enabled automatically if stdout is a "
+                       "TTY. Use --no-verbose to disable.",
+        "context": "ALL",
+        "argument_type": "OPTIONAL_FLAG",
+        "default": None
+    },
+    "debug": {
+        "short_name": "d",
+        "description": "Enable debug logging.",
+        "context": "ALL",
+        "argument_type": "FLAG",
+        "default": False
+    },
+    "quiet": {
+        "short_name": "q",
+        "description": "Suppress all output other than scan results.",
+        "context": "ALL",
+        "argument_type": "FLAG",
+        "default": False
+    },
+    "banner": {
+        "description": "Display the Wordfence banner in command output when "
+                       "running in a TTY/terminal.",
+        "context": "ALL",
+        "argument_type": "FLAG",
+        "default": True
+    },
     "progress": {
         "description": "Display scan progress in the terminal with a curses "
                        "interface",
@@ -184,53 +303,30 @@ config_definitions: ConfigDefinitions = {
         "argument_type": "FLAG",
         "default": False
     },
+    "configure": {
+        "description": "Interactively configure Wordfence CLI.",
+        "context": "CLI",
+        "argument_type": "OPTIONAL_FLAG",
+        "default": None
+    },
+    "version": {
+        "description": "Display the version of Wordfence CLI.",
+        "context": "CLI",
+        "argument_type": "FLAG",
+        "default": False
+    },
+    "check-for-update": {
+        "description": "Whether or not to run the update check.",
+        "context": "ALL",
+        "argument_type": "FLAG",
+        "default": True,
+        "hidden": True
+    },
+    "noc1-url": {
+        "description": "URL to use for accessing the NOC1 API.",
+        "context": "ALL",
+        "argument_type": "OPTION",
+        "default": None,
+        "hidden": True
+    },
 }
-
-
-cacheable_types = {
-    'wordfence.intel.signatures.SignatureSet',
-    'wordfence.intel.signatures.CommonString',
-    'wordfence.intel.signatures.Signature',
-    'wordfence.api.licensing.License'
-}
-
-examples = [
-    UsageExample(
-        'Scan /var/www/html for malicious files and display real-time output',
-        'wordfence malware-scan --progress /var/www/html'
-    ),
-    UsageExample(
-        'Scan for malicious files in multiple directories and record the '
-        'results to a CSV file',
-        'wordfence malware-scan --output-path /home/user/wordfence-cli.csv '
-        '/home/user-one/dir /home/user-two/dir /home/user-three/dir'
-    ),
-    UsageExample(
-        'Scan a directory for malicious files with any extension using 4 '
-        'worker processes, writing each matching file name to a line in '
-        'results.txt',
-        'wordfence malware-scan -a -w 4 --output-path /path/to/results.txt '
-        '--output-format line-delimited /path/to/scan'
-    ),
-    UsageExample(
-        'Scan only files with a .js extension for malware',
-        'wordfence malware-scan --include-files-pattern ".*\\.js$" '
-        '/path/to/scan'
-    ),
-    UsageExample(
-        'Find files updated in the last 60 and scan them for malware',
-        'find /var/www/ -cmin -60 -type f -print0 | wordfence malware-scan '
-        '--output-path /home/username/wordfence-cli.csv'
-    )
-]
-
-definition = SubcommandDefinition(
-    name='malware-scan',
-    usage='[OPTIONS] [PATH]...',
-    description='Scan files for malware',
-    config_definitions=config_definitions,
-    config_section='MALWARE_SCAN',
-    cacheable_types=cacheable_types,
-    previous_names={'scan'},
-    examples=examples
-)
