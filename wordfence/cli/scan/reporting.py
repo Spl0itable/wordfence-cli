@@ -61,7 +61,10 @@ class CsvReportWriter(ReportWriter):
         return ' '
 
     def colorize_filename(self, filename: str) -> str:
-        return f"{curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)}{filename}{curses.color_pair(0)}"
+        curses.initscr()
+        colorized_name = f"{curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)}{filename}{curses.color_pair(0)}"
+        curses.endwin()
+        return colorized_name
 
     def write_row(self, data: List[str]) -> None:
         highlighted_row = [self.highlight_filenames(item) for item in data]
