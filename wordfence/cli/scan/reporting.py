@@ -68,7 +68,7 @@ class CsvReportWriter(ReportWriter):
         if isinstance(item, str):
             filename_regex = re.compile(self.FILENAME_REGEX)
             return filename_regex.sub(
-                lambda match: self.colorize_filename(match.group(1)),
+                lambda match: curses.color_pair(1) + match.group(1) + curses.color_pair(0),
                 item
             )
         return item
@@ -152,14 +152,6 @@ class Report:
         self.headers_written = False
         self.writers = []
 
-    def colorize_filename(self, filename: str) -> str:
-        curses.initscr()
-        curses.start_color()
-        curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-        colorized_name = f"{curses.color_pair(1)}{filename}{curses.color_pair(0)}"
-        curses.endwin()
-        return colorized_name    
-
     def _initialize_writer(self, stream: IO) -> ReportWriter:
         if self.format == ReportFormat.CSV:
             return CsvReportWriter(stream)
@@ -177,18 +169,16 @@ class Report:
     def add_target(self, stream: IO) -> None:
         writer = self._initialize_writer(stream)
         self.writers.append(writer)
-        self.writer = writer
-    
+
     def _get_column_value(
-            self,
-            column: str,
-            result: ScanResult,
-            signature: Signature,
-            match: str
-        ) -> Any:
+                self,
+                column: str,
+                result: ScanResult,
+                signature: Signature,
+                match: str
+            ) -> Any:
         if column == ReportColumn.FILENAME.value:
-            filename = result.path
-            return self.writers[0].colorize_filename(filename)
+            return result.path
         elif column == ReportColumn.SIGNATURE_ID.value:
             return signature.identifier
         elif column == ReportColumn.SIGNATURE_NAME.value:
