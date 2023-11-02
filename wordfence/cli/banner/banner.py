@@ -73,7 +73,7 @@ class Banner:
 
     def display(self) -> None:
         for row in self.rows:
-            print(row)
+            print('\033[96m' + row + '\033[0m')  # Adds ANSI color cyan
 
     def __str__(self) -> str:
         return self.content
