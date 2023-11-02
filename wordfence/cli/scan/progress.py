@@ -1,3 +1,4 @@
+import re
 import curses
 import logging
 import signal
