@@ -159,6 +159,7 @@ class Report:
         self.write_headers = write_headers
         self.headers_written = False
         self.writers = []
+        self.terminal_writers = []  # New list for terminal writers
 
     def _initialize_writer(self, stream: IO) -> ReportWriter:
         if self.format == ReportFormat.CSV:
@@ -174,9 +175,12 @@ class Report:
         else:
             raise ValueError('Unsupported report format: ' + str(self.format))
 
-    def add_target(self, stream: IO) -> None:
+    def add_target(self, stream: IO, is_terminal: bool = False) -> None:
         writer = self._initialize_writer(stream)
-        self.writers.append(writer)
+        if is_terminal:
+            self.terminal_writers.append(writer)
+        else:
+            self.writers.append(writer)
 
     def _get_column_value(
                 self,
@@ -219,11 +223,16 @@ class Report:
     def _write_row(self, data: List[str]):
         for writer in self.writers:
             writer.write_row(data)
+        for writer in self.terminal_writers:  # New loop for terminal writers
+            writer.write_row(data, is_terminal_output=True)
 
     def _write_headers(self) -> None:
         if self.headers_written or not self.write_headers:
             return
         for writer in self.writers:
+            if writer.allows_headers():
+                writer.write_row(self.columns)
+        for writer in self.terminal_writers:  # New loop for terminal writers
             if writer.allows_headers():
                 writer.write_row(self.columns)
         self.headers_written = True
@@ -232,8 +241,7 @@ class Report:
         self._write_headers()
         rows = self._format_result(result)
         for row in rows:
-            for writer in self.writers:
-                writer.write_row(row)
+            self._write_row(row)
 
     def has_writers(self) -> bool:
-        return len(self.writers) > 0
+        return len(self.writers) > 0 or len(self.terminal_writers) > 0
