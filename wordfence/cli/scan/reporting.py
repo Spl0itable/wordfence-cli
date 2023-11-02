@@ -51,26 +51,32 @@ class ReportWriter:
 
 import curses
 
-class CsvReportWriter(ReportWriter):
-    FILENAME_REGEX = r"(?<=\s)([^\s/]+\.[a-zA-Z]{2,4})(?=\s)"
-
-    def initialize(self):
-        self.writer = csv.writer(self._target, delimiter=self.get_delimiter())
-
-    def get_delimiter(self) -> str:
-        return ' '
-
-    def write_row(self, data: List[str]) -> None:
-        highlighted_row = [self.highlight_filenames(item) for item in data]
+class CsvReportWriter:
+    YELLOW = '\033[93m'
+    END = '\033[0m'
+    FILENAME_REGEX = r'your-regex-here'
+    
+    # Add a new parameter `is_terminal_output` to your method
+    def write_row(self, data: List[str], is_terminal_output: bool = False) -> None:
+        highlighted_row = [self.highlight_filenames(item, is_terminal_output) for item in data]
         self.writer.writerow(highlighted_row)
 
-    def highlight_filenames(self, item):
+    # Add the same `is_terminal_output` parameter to your highlight_filenames method
+    def highlight_filenames(self, item: str, is_terminal_output: bool) -> str:
         if isinstance(item, str):
             filename_regex = re.compile(self.FILENAME_REGEX)
-            return filename_regex.sub(
-                lambda match: curses.color_pair(1) + match.group(1) + curses.color_pair(0),
-                item
-            )
+            if is_terminal_output:
+                # If output is for terminal, use ANSI escape sequences for color
+                return filename_regex.sub(
+                    lambda match: self.YELLOW + match.group(1) + self.END,
+                    item
+                )
+            else:
+                # If output is not for terminal (like a file), return plain text
+                return filename_regex.sub(
+                    lambda match: match.group(1),
+                    item
+                )
         return item
 
 
