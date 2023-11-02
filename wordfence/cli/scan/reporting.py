@@ -186,7 +186,7 @@ class Report:
         ) -> Any:
         if column == ReportColumn.FILENAME.value:
             filename = result.path
-            return self.writer.colorize_filename(filename)
+            return self.writers[0].colorize_filename(filename)
         elif column == ReportColumn.SIGNATURE_ID.value:
             return signature.identifier
         elif column == ReportColumn.SIGNATURE_NAME.value:
