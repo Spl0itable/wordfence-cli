@@ -169,6 +169,7 @@ class Report:
     def add_target(self, stream: IO) -> None:
         writer = self._initialize_writer(stream)
         self.writers.append(writer)
+        self.writer = writer
 
     def colorize_filename(self, filename: str) -> str:
         return f"{curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)}{filename}{curses.color_pair(0)}"
