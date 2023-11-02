@@ -60,14 +60,6 @@ class CsvReportWriter(ReportWriter):
     def get_delimiter(self) -> str:
         return ' '
 
-    def colorize_filename(self, filename: str) -> str:
-        curses.initscr()
-        curses.start_color()
-        curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-        colorized_name = f"{curses.color_pair(1)}{filename}{curses.color_pair(0)}"
-        curses.endwin()
-        return colorized_name
-
     def write_row(self, data: List[str]) -> None:
         highlighted_row = [self.highlight_filenames(item) for item in data]
         self.writer.writerow(highlighted_row)
@@ -159,6 +151,14 @@ class Report:
         self.write_headers = write_headers
         self.headers_written = False
         self.writers = []
+
+    def colorize_filename(self, filename: str) -> str:
+        curses.initscr()
+        curses.start_color()
+        curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+        colorized_name = f"{curses.color_pair(1)}{filename}{curses.color_pair(0)}"
+        curses.endwin()
+        return colorized_name    
 
     def _initialize_writer(self, stream: IO) -> ReportWriter:
         if self.format == ReportFormat.CSV:
