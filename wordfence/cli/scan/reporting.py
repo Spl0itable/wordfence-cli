@@ -138,7 +138,7 @@ class HumanReadableWriter(ReportWriter):
         if self.file_path_found:
             self._target.write("Possible malicious file(s) found:\n")
         else:
-            self._target.write("No malware found (⊃｡•́‿•̀｡)⊃\n")
+            self._target.write("No malware found!\n")
 
     def allows_headers(self) -> bool:
         return False
