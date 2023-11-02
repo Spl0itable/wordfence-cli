@@ -178,7 +178,7 @@ class Report:
                 match: str
             ) -> Any:
         if column == ReportColumn.FILENAME.value:
-            return '\033[93m' + result.path + '\033[0m'
+            return result.path
         elif column == ReportColumn.SIGNATURE_ID.value:
             return signature.identifier
         elif column == ReportColumn.SIGNATURE_NAME.value:
