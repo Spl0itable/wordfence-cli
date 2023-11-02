@@ -112,5 +112,10 @@ def should_show_welcome_banner(banner_enabled):
 
 def show_welcome_banner_if_enabled(config) -> None:
     if should_show_welcome_banner(config.banner) and \
+<<<<<<< HEAD
             not config.progress:
+=======
+            not config.get('quiet, False') and \
+            not config.get('progress', False):
+>>>>>>> parent of a57dc3e (Revert "Merge remote-tracking branch 'upstream/main'")
         show_welcome_banner()
