@@ -349,6 +349,10 @@ class LogBox(Box):
         self.cursor_offset = Position(last_line_number, last_line_length)
 
     def add_message(self, message: str) -> None:
+        # Strip ANSI color codes from the message
+        ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+        message = ansi_escape.sub('', message)
+
         filtered_message = filter_control_characters(message)
         self.messages.append(filtered_message)
         if '/www/' in filtered_message:
