@@ -60,6 +60,9 @@ class CsvReportWriter(ReportWriter):
     def get_delimiter(self) -> str:
         return ' '
 
+    def colorize_filename(self, filename: str) -> str:
+        return f"{curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)}{filename}{curses.color_pair(0)}"
+
     def write_row(self, data: List[str]) -> None:
         highlighted_row = [self.highlight_filenames(item) for item in data]
         self.writer.writerow(highlighted_row)
@@ -68,7 +71,7 @@ class CsvReportWriter(ReportWriter):
         if isinstance(item, str):
             filename_regex = re.compile(self.FILENAME_REGEX)
             return filename_regex.sub(
-                lambda match: curses.color_pair(1) + match.group(1) + curses.color_pair(0),
+                lambda match: self.colorize_filename(match.group(1)),
                 item
             )
         return item
