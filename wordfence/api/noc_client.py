@@ -1,5 +1,4 @@
 import requests
-from typing import Optional
 from urllib.parse import urlencode
 
 from .licensing import License
@@ -13,7 +12,7 @@ class NocClient:
 
     def __init__(
                 self,
-                license: Optional[License] = None,
+                license: License,
                 base_url: str = None,
                 timeout: int = DEFAULT_TIMEOUT
             ):
@@ -32,8 +31,7 @@ class NocClient:
         else:
             query = base_query.copy()
         query['action'] = action
-        if self.license is not None:
-            query['k'] = self.license.key
+        query['k'] = self.license.key
         query['cli'] = 1
         return query
 

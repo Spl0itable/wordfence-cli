@@ -1,5 +1,5 @@
 # Runtime dependencies
-packaging >= 21.0
+packaging >= 23.1
 requests >= 2.3
 # Build requirements
 build ~= 0.10
