@@ -170,15 +170,19 @@ class Report:
         writer = self._initialize_writer(stream)
         self.writers.append(writer)
 
+    def colorize_filename(self, filename: str) -> str:
+        return f"{curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)}{filename}{curses.color_pair(0)}"
+    
     def _get_column_value(
-                self,
-                column: str,
-                result: ScanResult,
-                signature: Signature,
-                match: str
-            ) -> Any:
+            self,
+            column: str,
+            result: ScanResult,
+            signature: Signature,
+            match: str
+        ) -> Any:
         if column == ReportColumn.FILENAME.value:
-            return result.path
+            filename = result.path
+            return self.writer.colorize_filename(filename)
         elif column == ReportColumn.SIGNATURE_ID.value:
             return signature.identifier
         elif column == ReportColumn.SIGNATURE_NAME.value:
