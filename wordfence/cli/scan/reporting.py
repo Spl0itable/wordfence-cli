@@ -100,6 +100,7 @@ class HumanReadableWriter(ReportWriter):
         super().__init__(target)
         self._columns = columns
         self.file_path_found = False
+        self.header_message = "Scanning for malicious files...\n"
 
     def _get_value(data: List[str], column: str) -> str:
         return
@@ -110,6 +111,11 @@ class HumanReadableWriter(ReportWriter):
         }
 
     def write_row(self, data: List[str]) -> None:
+        # If this is the first row being written, print the header message first
+        if not self.file_path_found:
+            self._target.write(self.header_message)
+            self.file_path_found = True  # Mark as header printed
+        
         values = self._map_data_to_dict(data)
         file = None
         signature_id = None
@@ -118,7 +124,6 @@ class HumanReadableWriter(ReportWriter):
             self.file_path_found = True
         if 'signature_id' in values:
             signature_id = values['signature_id']
-        # TODO: Add more custom messages if desired
         if file is not None:
             if signature_id is not None:
                 self._target.write(
@@ -138,7 +143,7 @@ class HumanReadableWriter(ReportWriter):
         if self.file_path_found:
             self._target.write("Possible malicious file(s) found:\n")
         else:
-            self._target.write("No malware found!\n")
+            self._target.write("No malware found (⊃｡•́‿•̀｡)⊃\n")
 
     def allows_headers(self) -> bool:
         return False
